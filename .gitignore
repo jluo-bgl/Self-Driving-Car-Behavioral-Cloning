@@ -87,3 +87,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+datasets/
+/model.h5
+/model.json
+
