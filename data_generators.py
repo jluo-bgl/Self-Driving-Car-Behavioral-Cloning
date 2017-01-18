@@ -16,6 +16,11 @@ def right_image_generator(drive_record):
     return drive_record.right_image(), drive_record.steering_angle - 0.2
 
 
+def shift_image_generator(feeding_data):
+    image, angle, _ = _shift_image(feeding_data.image(), feeding_data.steering_angle, 100, 20)
+    return image, angle
+
+
 def center_left_right_image_generator(drive_record):
     generator = random_generators(center_image_generator, left_image_generator, right_image_generator)
     return generator(drive_record)
