@@ -9,7 +9,7 @@ class Trainer(object):
     def generate_model(self):
         return nvida1()
 
-    def fit(self):
+    def fit(self, generator):
         model = self.generate_model()
         model.summary()
 
@@ -32,10 +32,8 @@ class Trainer(object):
 
         epochs = 5
         batch_size = 128
-        model.fit(self.data_provider.images, self.data_provider.angles,
-                  validation_split=0.2,
-                  nb_epoch=epochs,
-                  batch_size=batch_size,
-                  shuffle=True,
-                  callbacks=[checkpointer]
-                  )
+        model.fit_generator(generator, samples_per_epoch=20000,
+                            nb_epoch=10,
+                            verbose=1,
+                            callbacks=[checkpointer]
+                            )

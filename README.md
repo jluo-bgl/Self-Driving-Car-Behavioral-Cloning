@@ -1,8 +1,10 @@
 # self-driving-car-behavioral-cloning
 This is [UDacity](https://www.udacity.com/drive) Self Driving Car Behavioral Cloning Project
 
-This repository arms to help me pass the project and helps you find all related data / method
-in a single place.
+This repository arms to help me pass the project and helps you who is learning deep learning to
+1. Easy to experiment, from simply apply CNN model to very complex data augment
+2. Visualise what's going on
+3. Build more understanding about how deep learning works
 
 ###Before Start
 ####Existing Solutions
@@ -44,9 +46,18 @@ python drive.py model.json
 ```
 this script will read model.json and model.h5, and play UDacity in Autonomous Mode
 
+#Architecture
+The whole system has been designed for easy to 
+1. Experiment
+2. Understand
+3. Extend
+
+##Data
+
+##Model
 
 #Iterations
-###Self Struggling Car
+###1. Self Stuck Car
 1. Center Images
 2. No Augmention
 3. Nvidia Model with one dropout
@@ -62,4 +73,13 @@ To reproduce this iteration, run below code
     data_provider = DriveDataProvider.load_from_file("datasets/udacity-sample-track-1/driving_data.p")
     Trainer(data_provider).fit()
 ```
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=mmGoI1crA9s
+" target="_blank"><img src="http://img.youtube.com/vi/mmGoI1crA9s/0.jpg" 
+alt="Iteration 1 Self Stuck Car" width="400" height="360" border="10" /></a>
+
+###2. Center/Left/Right Images
+As i'm running into 2GB file saving issue in python, it's time to start involve in Keras generator
+so that I don't need create a super large file and load it into memory
+
+
 

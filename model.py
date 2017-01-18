@@ -1,7 +1,7 @@
 import tensorflow as tf
 tf.python.control_flow_ops = tf
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Dense, Dropout, Activation, Flatten, Lambda
 from keras.layers import Convolution2D, MaxPooling2D
 
 from keras import backend as K
@@ -19,6 +19,9 @@ K.set_image_dim_ordering('tf')
 
 def nvida1():
     model = Sequential()
+    model.add(Lambda(lambda x: x / 127.5 - 1.,
+                     input_shape=(160, 320, 3),
+                     output_shape=(160, 320, 3)))
     # model.add(Input(shape=(66, 200, 3)))
     # model.add(Dropout(.5))
     model.add(Convolution2D(24, 5, 5, name='conv_1', subsample=(2, 2), input_shape=(160, 320, 3)))
