@@ -17,8 +17,8 @@ class Trainer(object):
 
         checkpointer = ModelCheckpoint(
             filepath="model.h5",
-            monitor='val_mean_squared_error',
-            verbose=1, save_best_only=True, mode='min'
+            save_weights_only=True,
+            verbose=1
         )
 
         # early_stop = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0001, patience=4, verbose=1, mode='min')
