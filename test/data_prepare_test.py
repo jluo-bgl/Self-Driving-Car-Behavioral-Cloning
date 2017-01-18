@@ -3,7 +3,7 @@ import numpy.testing
 import os
 import numpy as np
 from data_load import DrivingDataLoader
-from data_load import DriveDataProvider, DataGenerator, Record, DriveDataSet
+from data_load import DriveDataProvider, DataGenerator, DriveRecord, DriveDataSet
 
 
 class TestDataLoad(unittest.TestCase):

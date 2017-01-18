@@ -1,4 +1,4 @@
-# self-driving-car-behavioral-cloning
+#Learn human driving behavior based on deep neural network
 This is [UDacity](https://www.udacity.com/drive) Self Driving Car Behavioral Cloning Project
 
 This repository arms to help me pass the project and helps you who is learning deep learning to
@@ -57,7 +57,7 @@ The whole system has been designed for easy to
 ##Model
 
 #Iterations
-###1. Self Stuck Car
+###Iteration 1 Self Stuck Car
 1. Center Images
 2. No Augmention
 3. Nvidia Model with one dropout
@@ -65,21 +65,26 @@ The whole system has been designed for easy to
 5. 55% validation accuracy
 To reproduce this iteration, run below code
 ```python
-    data_provider = DriveDataProvider(
-        *DrivingDataLoader("datasets/udacity-sample-track-1/driving_log.csv").images_and_angles())
-    data_provider.save_to_file("datasets/udacity-sample-track-1/driving_data.p")
+dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv")
+data_generator = DataGenerator(center_image_generator)
+Trainer(learning_rate=0.0001, epoch=10).fit(data_generator.generate(dataset, batch_size=128))
 ```
-```python
-    data_provider = DriveDataProvider.load_from_file("datasets/udacity-sample-track-1/driving_data.p")
-    Trainer(data_provider).fit()
-```
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=mmGoI1crA9s
-" target="_blank"><img src="http://img.youtube.com/vi/mmGoI1crA9s/0.jpg" 
-alt="Iteration 1 Self Stuck Car" width="400" height="360" border="10" /></a>
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=mmGoI1crA9s" target="_blank">
+<img src="http://img.youtube.com/vi/mmGoI1crA9s/0.jpg" alt="Iteration 1 Self Stuck Car" width="400" height="360" border="10" /></a>
 
-###2. Center/Left/Right Images
+###Iteration 2 Center/Left/Right Images, able to make first turn
 As i'm running into 2GB file saving issue in python, it's time to start involve in Keras generator
 so that I don't need create a super large file and load it into memory
+```python
+dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv")
+data_generator = DataGenerator(center_left_right_image_generator)
+Trainer(learning_rate=0.0001, epoch=10).fit(data_generator.generate(dataset, batch_size=128))
+```
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=NlQLqaX0qqE" target="_blank">
+<img src="http://img.youtube.com/vi/NlQLqaX0qqE/0.jpg" alt="Iteration 2 First Turn Succeed" width="400" height="360" border="10" /></a>
 
 
-
+###Iteration 3 What else
+so far we have made use of all provided data, what else can we do?
+shift the center image and adjust angles accordingly?
+sounds like a good idea, let's implement it

@@ -19,7 +19,16 @@ def read_image_from_file(image_file_name):
     return plt.imread(image_file_name)
 
 
-class Record(object):
+class FeedingData(object):
+    def __init__(self, image, steering_angle):
+        self._image = image
+        self.steering_angle = steering_angle
+
+    def image(self):
+        return self._image
+
+
+class DriveRecord(FeedingData):
     """
     One Record is the actual record from CAR, it is a event happened past, immutable and no one is going to
     modify it.
@@ -28,15 +37,19 @@ class Record(object):
     """
     def __init__(self, base_folder, csv_data_frame_row):
         # index,center,left,right,steering,throttle,brake,speed
+        super().__init__(None, csv_data_frame_row[4])
+
         self.index = csv_data_frame_row[0]
         self.center_file_name = full_file_name(base_folder, csv_data_frame_row[1])
         self.left_file_name = full_file_name(base_folder, csv_data_frame_row[2])
         self.right_file_name = full_file_name(base_folder, csv_data_frame_row[3])
-        self.steering_angle = csv_data_frame_row[4]
 
         self._center_image = None
         self._left_image = None
         self._right_image = None
+
+    def image(self):
+        return self.center_image()
 
     def center_image(self):
         if self._center_image is None:
@@ -67,7 +80,7 @@ class DriveDataSet(object):
         # center,left,right,steering,throttle,brake,speed
         self.data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
         self.records = list(map(
-            lambda index: Record(self.base_folder, self.data_frame.iloc[[index]].reset_index().values[0]),
+            lambda index: DriveRecord(self.base_folder, self.data_frame.iloc[[index]].reset_index().values[0]),
             range(len(self.data_frame))))
 
     def __getitem__(self, n):
