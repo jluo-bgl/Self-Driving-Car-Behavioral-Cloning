@@ -2,9 +2,11 @@ from model import nvida1
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.optimizers import Adam
 
+
 class Trainer(object):
-    def __init__(self, data_provider):
-        self.data_provider = data_provider
+    def __init__(self, learning_rate, epoch):
+        self.learning_rate = learning_rate
+        self.epoch = epoch
 
     def generate_model(self):
         return nvida1()
@@ -21,7 +23,7 @@ class Trainer(object):
 
         # early_stop = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0001, patience=4, verbose=1, mode='min')
 
-        adam = Adam(lr=0.001)
+        adam = Adam(lr=self.learning_rate)
         model.compile(optimizer=adam, loss='mean_squared_error', metrics=['accuracy', 'mean_squared_error'])
 
         print('Starting training')
@@ -30,10 +32,8 @@ class Trainer(object):
         with open("model.json", "w") as json_file:
             json_file.write(model_json)
 
-        epochs = 5
-        batch_size = 128
         model.fit_generator(generator, samples_per_epoch=20000,
-                            nb_epoch=10,
+                            nb_epoch=self.epoch,
                             verbose=1,
                             callbacks=[checkpointer]
                             )
