@@ -5,12 +5,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 from performance_timer import Timer
 
+
 def full_file_name(base_folder, image_file_name):
     return base_folder + "/" + image_file_name.strip()
 
 
 def read_image_from_file(image_file_name):
     return plt.imread(image_file_name)
+
+
+def _crop_image(img, new_height=66, new_width=200):
+    width = img.shape[1]
+    y_start = 60
+    x_start = int(width / 2) - int(new_width / 2)
+
+    return img[y_start:y_start + new_height, x_start:x_start + new_width]
 
 
 class FeedingData(object):
@@ -29,7 +38,13 @@ class DriveRecord(FeedingData):
     It has 3 images and steering angle at that time.
     Images will cache to memory after first read (if no one read the file, it won't fill the memory)
     """
-    def __init__(self, base_folder, csv_data_frame_row):
+    def __init__(self, base_folder, csv_data_frame_row, crop_image=False):
+        """
+
+        :param base_folder:
+        :param csv_data_frame_row:
+        :param crop_image: crop to 66*200 or not, only crop if image larger then 66*200
+        """
         # index,center,left,right,steering,throttle,brake,speed
         super().__init__(None, csv_data_frame_row[4])
 
@@ -37,6 +52,8 @@ class DriveRecord(FeedingData):
         self.center_file_name = full_file_name(base_folder, csv_data_frame_row[1])
         self.left_file_name = full_file_name(base_folder, csv_data_frame_row[2])
         self.right_file_name = full_file_name(base_folder, csv_data_frame_row[3])
+
+        self.crop_image = crop_image
 
         self._center_image = None
         self._left_image = None
@@ -47,21 +64,27 @@ class DriveRecord(FeedingData):
 
     def center_image(self):
         if self._center_image is None:
-            self._center_image = read_image_from_file(self.center_file_name)
+            self._center_image = self.read_image(self.center_file_name)
 
         return self._center_image
 
     def left_image(self):
         if self._left_image is None:
-            self._left_image = read_image_from_file(self.left_file_name)
+            self._left_image = self.read_image(self.left_file_name)
 
         return self._left_image
 
     def right_image(self):
         if self._right_image is None:
-            self._right_image = read_image_from_file(self.right_file_name)
+            self._right_image = self.read_image(self.right_file_name)
 
         return self._right_image
+
+    def read_image(self, file_name):
+        image = read_image_from_file(file_name)
+        if self.crop_image:
+            image = _crop_image(image, 66, 200)
+        return image
 
 
 class DriveDataSet(object):
@@ -69,22 +92,27 @@ class DriveDataSet(object):
     DriveDataSet represent multiple Records together, you can access any record by [index] or iterate through
     As it represent past, it's immutable as well
     """
-    def __init__(self, file_name):
+    def __init__(self, file_name, crop_images=False):
         self.base_folder = os.path.split(file_name)[0]
         # center,left,right,steering,throttle,brake,speed
         self.data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
         self.records = list(map(
-            lambda index: DriveRecord(self.base_folder, self.data_frame.iloc[[index]].reset_index().values[0]),
+            lambda index: DriveRecord(self.base_folder,
+                                      self.data_frame.iloc[[index]].reset_index().values[0],
+                                      crop_images),
             range(len(self.data_frame))))
 
     def __getitem__(self, n):
         return self.records[n]
 
     def __iter__(self):
-        return self.records
+        return self.records.__iter__()
 
     def __len__(self):
         return len(self.records)
+
+    def output_shape(self):
+        return self.records[0].image().shape
 
 
 class DataGenerator(object):
@@ -92,7 +120,8 @@ class DataGenerator(object):
         self.custom_generator = custom_generator
 
     def generate(self, data_set, batch_size=32):
-        batch_images = np.zeros((batch_size, 160, 320, 3))
+        input_shape = data_set.output_shape()
+        batch_images = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
         batch_steering = np.zeros(batch_size)
         while 1:
             for i_batch in range(batch_size):

@@ -4,16 +4,17 @@ from keras.optimizers import Adam
 
 
 class Trainer(object):
-    def __init__(self, learning_rate, epoch, multi_process=False):
+    def __init__(self, learning_rate, epoch, multi_process=False, number_of_worker=4):
         self.learning_rate = learning_rate
         self.epoch = epoch
         self.multi_process = multi_process
+        self.number_of_worker = number_of_worker
 
-    def generate_model(self):
-        return nvida1()
+    def generate_model(self, input_shape):
+        return nvida1(input_shape)
 
-    def fit(self, generator):
-        model = self.generate_model()
+    def fit(self, generator, input_shape):
+        model = self.generate_model(input_shape)
         model.summary()
 
         checkpointer = ModelCheckpoint(
@@ -33,10 +34,10 @@ class Trainer(object):
         with open("model.json", "w") as json_file:
             json_file.write(model_json)
 
-        model.fit_generator(generator, samples_per_epoch=20000,
+        model.fit_generator(generator, samples_per_epoch=16384,
                             nb_epoch=self.epoch,
                             verbose=1,
-                            nb_worker=4,
+                            nb_worker=self.number_of_worker,
                             max_q_size=20,
                             pickle_safe=self.multi_process,
                             callbacks=[checkpointer]
