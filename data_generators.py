@@ -9,11 +9,11 @@ def center_image_generator(drive_record):
 
 
 def left_image_generator(drive_record):
-    return drive_record.left_image(), drive_record.steering_angle + 0.2
+    return drive_record.left_image(), drive_record.steering_angle + 0.3
 
 
 def right_image_generator(drive_record):
-    return drive_record.right_image(), drive_record.steering_angle - 0.2
+    return drive_record.right_image(), drive_record.steering_angle - 0.3
 
 
 def shift_image_generator(feeding_data):
@@ -51,20 +51,8 @@ def pipe_line_generators(*generators):
 
 
 def _shift_image(image, steer, left_right_shift_range, top_bottom_shift_range):
-    tr_x = round(left_right_shift_range * np.random.uniform(-0.5, 0.5))
-    steer_ang = steer + tr_x * .002
-    tr_y = round(top_bottom_shift_range * np.random.uniform(-0.5, 0.5))
-    image_tr = scipy.ndimage.interpolation.shift(image, (tr_y, tr_x, 0))
-    return image_tr, steer_ang, tr_x
-
-
-def trans_image(image, steer, trans_range):
-    # Translation
-    tr_x = trans_range * np.random.uniform() - trans_range / 2
-    steer_ang = steer + tr_x / trans_range * 2 * .2
-    tr_y = 10 * np.random.uniform() - 10 / 2
-    # tr_y = 0
-    Trans_M = np.float32([[1, 0, tr_x], [0, 1, tr_y]])
-    image_tr = cv2.warpAffine(image, Trans_M, (3, 1))
-
-    return image_tr, steer_ang, tr_x
+    shift_size = round(left_right_shift_range * np.random.uniform(-0.5, 0.5))
+    steer_ang = steer + shift_size * 0.004
+    top_bottom_shift_size = round(top_bottom_shift_range * np.random.uniform(-0.5, 0.5))
+    image_tr = scipy.ndimage.interpolation.shift(image, (top_bottom_shift_size, shift_size, 0))
+    return image_tr, steer_ang, shift_size
