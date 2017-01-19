@@ -10,7 +10,7 @@ class TestGeneratorFuncs(unittest.TestCase):
         angle = 1
         image = np.array([[[1, 1, 1], [2, 2, 2], [3, 3, 3]]])
         new_image, new_angle, shift_size = _shift_image(image, angle, 3, 0)
-        self.assertEqual(new_angle, angle + shift_size * 0.002)
+        self.assertEqual(new_angle, angle + shift_size * 0.004)
         if shift_size == 1:
             numpy.testing.assert_almost_equal(new_image, [[[0, 0, 0], [1, 1, 1], [2, 2, 2]]])
         elif shift_size == 2:

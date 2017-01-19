@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import scipy
+import scipy.ndimage
 from data_load import FeedingData
 
 

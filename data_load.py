@@ -3,13 +3,7 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-from moviepy.editor import VideoFileClip
-
-# white_output = 'white.mp4'
-# clip1 = VideoFileClip("solidWhiteRight.mp4")
-# white_clip = clip1.fl_image(process_image)  # NOTE: this function expects color images!!
-# % time
-# white_clip.write_videofile(white_output, audio=False)
+from performance_timer import Timer
 
 def full_file_name(base_folder, image_file_name):
     return base_folder + "/" + image_file_name.strip()
@@ -103,6 +97,7 @@ class DataGenerator(object):
         while 1:
             for i_batch in range(batch_size):
                 index = np.random.randint(len(data_set))
+                # with Timer(True):
                 x, y = self.custom_generator(data_set[index])
                 batch_images[i_batch] = x
                 batch_steering[i_batch] = y

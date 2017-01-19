@@ -4,9 +4,10 @@ from keras.optimizers import Adam
 
 
 class Trainer(object):
-    def __init__(self, learning_rate, epoch):
+    def __init__(self, learning_rate, epoch, multi_process=False):
         self.learning_rate = learning_rate
         self.epoch = epoch
+        self.multi_process = multi_process
 
     def generate_model(self):
         return nvida1()
@@ -36,5 +37,6 @@ class Trainer(object):
                             nb_epoch=self.epoch,
                             verbose=1,
                             nb_worker=4,
+                            pickle_safe=self.multi_process,
                             callbacks=[checkpointer]
                             )
