@@ -35,5 +35,6 @@ class Trainer(object):
         model.fit_generator(generator, samples_per_epoch=20000,
                             nb_epoch=self.epoch,
                             verbose=1,
+                            nb_worker=4,
                             callbacks=[checkpointer]
                             )
