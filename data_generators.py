@@ -21,7 +21,7 @@ def shift_image_generator(feeding_data):
     return image, angle
 
 
-def center_left_right_image_generator(drive_record):
+def random_center_left_right_image_generator(drive_record):
     generator = random_generators(center_image_generator, left_image_generator, right_image_generator)
     return generator(drive_record)
 

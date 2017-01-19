@@ -37,6 +37,7 @@ class Trainer(object):
                             nb_epoch=self.epoch,
                             verbose=1,
                             nb_worker=4,
+                            max_q_size=20,
                             pickle_safe=self.multi_process,
                             callbacks=[checkpointer]
                             )
