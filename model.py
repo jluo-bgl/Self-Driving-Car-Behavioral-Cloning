@@ -27,7 +27,7 @@ def nvida1(input_shape):
     # model.add(Dropout(.5))
     model.add(Convolution2D(64, 3, 3, name='conv_5', subsample=(1, 1)))
     model.add(Activation('relu'))
-    model.add(Dropout(.5))
+    # model.add(Dropout(.5))
 
     model.add(Flatten())
 
@@ -38,7 +38,7 @@ def nvida1(input_shape):
     model.add(Activation('relu'))
     model.add(Dense(10))
     model.add(Activation('relu'))
-    model.add(Dropout(.5))
+    # model.add(Dropout(.5))
 
     model.add(Dense(1))
 

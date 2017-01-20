@@ -90,7 +90,7 @@ for example, center image with angle 0, move 10 pixels left would result angle 0
 <image1><image2><image3>
 In this iteration, we are facing a slow generator issue, as some images have to shift in the runtime,
 the training time for on epoch need 10 minutes, where it's take 50 seconds in iteration 2.
-The car able to reach the bridge as the best score.
+I discontinued this iteration and continue to 4
 
 ```python
 dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv", crop_images=False)
@@ -118,10 +118,11 @@ this modification change the whole framework to support different input data sha
 >please note, the whole system still support full image to been trained, just added one more parameter
 while contruct DriveDataSet(crop_images=True)
 
-Surprisely, without any change in system, our car able to drive a whole lap now.
 also trainable params dropped from **32,213,367** to **1,595,511**,
 the weight file size dropped from **128m** to **6.4m**,
 it's a huge train time save.
+
+In this iteration, we are able to drive until bridge, occasionally it's able to drive whole lap.
 
 ```python
 dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv", crop_images=True)
@@ -138,3 +139,23 @@ Trainer(learning_rate=0.0001, epoch=10, multi_process=True).fit(
     input_shape=dataset.output_shape()
 )
 ```
+
+
+###Iteration 5, remove shift from left and right camera images
+while look at the video, I noticed that it's go wild when approch road side, that's must be something wrong 
+with shift image, the angle we offset may too much, the left/right image we are using may use different ratio.
+so that in this test, just simple remove left right image before shift.
+As you can see in video, the car is much more smooth and can drive longer.
+```python
+data_generator = DataGenerator(
+    random_generators(
+        center_image_generator,
+        pipe_line_generators(
+            random_center_left_right_image_generator,
+            shift_image_generator
+        )
+    ))
+```
+
+
+###Iteration 6 Flip Image
