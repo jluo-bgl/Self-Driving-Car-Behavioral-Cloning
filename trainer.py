@@ -27,7 +27,7 @@ class Trainer(object):
         # early_stop = EarlyStopping(monitor='val_mean_squared_error', min_delta=0.0001, patience=4, verbose=1, mode='min')
 
         adam = Adam(lr=self.learning_rate)
-        model.compile(optimizer=adam, loss='mean_squared_error', metrics=['accuracy', 'mean_squared_error'])
+        model.compile(optimizer=adam, loss='mean_squared_error', metrics=['mean_squared_error'])
 
         print('Starting training')
 
