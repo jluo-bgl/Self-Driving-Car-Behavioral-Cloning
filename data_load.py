@@ -15,7 +15,10 @@ def read_image_from_file(image_file_name):
 
 
 def _crop_image(img, new_height=66, new_width=200):
-    width = img.shape[1]
+    height, width = img.shape[0], img.shape[1]
+    if (new_height >= height) and (new_width >= width):
+        return img
+
     y_start = 60
     x_start = int(width / 2) - int(new_width / 2)
 

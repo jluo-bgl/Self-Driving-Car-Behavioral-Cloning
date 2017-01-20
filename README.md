@@ -84,7 +84,57 @@ Trainer(learning_rate=0.0001, epoch=10).fit(data_generator.generate(dataset, bat
 <img src="http://img.youtube.com/vi/NlQLqaX0qqE/0.jpg" alt="Iteration 2 First Turn Succeed" width="400" height="360" border="10" /></a>
 
 
-###Iteration 3 What else
-so far we have made use of all provided data, what else can we do?
-shift the center image and adjust angles accordingly?
-sounds like a good idea, let's implement it
+###Iteration 3 Shift Image Randomly
+so far we have made use of all provided data, other idea is that shift the images and adjust angles accordingly.
+for example, center image with angle 0, move 10 pixels left would result angle 0.04
+<image1><image2><image3>
+In this iteration, we are facing a slow generator issue, as some images have to shift in the runtime,
+the training time for on epoch need 10 minutes, where it's take 50 seconds in iteration 2.
+The car able to reach the bridge as the best score.
+
+```python
+dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv", crop_images=False)
+data_generator = DataGenerator(
+    random_generators(
+        random_center_left_right_image_generator,
+        pipe_line_generators(
+            random_center_left_right_image_generator,
+            shift_image_generator
+        )
+    ))
+Trainer(learning_rate=0.0001, epoch=10, multi_process=True).fit(
+    data_generator.generate(dataset, batch_size=128),
+    input_shape=dataset.output_shape()
+)
+```
+
+###Iteration 4, Crop to 66x200
+To improve the performance, we start to support crop, images will reduced from 160x320 to 66x200
+this modification change the whole framework to support different input data shape, this include
+1. drive.py support any input shape
+2. Trainer will ask DriveDataSet for input shape and pass into model
+
+>The crop and multi_process reduced training time from 10 minutes to 1.5 minutes
+>please note, the whole system still support full image to been trained, just added one more parameter
+while contruct DriveDataSet(crop_images=True)
+
+Surprisely, without any change in system, our car able to drive a whole lap now.
+also trainable params dropped from **32,213,367** to **1,595,511**,
+the weight file size dropped from **128m** to **6.4m**,
+it's a huge train time save.
+
+```python
+dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv", crop_images=True)
+data_generator = DataGenerator(
+    random_generators(
+        random_center_left_right_image_generator,
+        pipe_line_generators(
+            random_center_left_right_image_generator,
+            shift_image_generator
+        )
+    ))
+Trainer(learning_rate=0.0001, epoch=10, multi_process=True).fit(
+    data_generator.generate(dataset, batch_size=128),
+    input_shape=dataset.output_shape()
+)
+```

@@ -14,7 +14,7 @@ from io import BytesIO
 
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
-
+from data_load import _crop_image
 import scipy.misc
 
 # Fix error with Keras and TensorFlow
@@ -26,6 +26,9 @@ sio = socketio.Server()
 app = Flask(__name__)
 model = None
 prev_image_array = None
+
+target_height = 160
+target_width = 320
 
 
 @sio.on('telemetry')
@@ -40,7 +43,7 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
-    # image_array = scipy.misc.imresize(image_array, (66, 200))
+    image_array = _crop_image(image_array, target_height, target_width)
     transformed_image_array = image_array[None, :, :, :]
 
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
@@ -77,6 +80,12 @@ if __name__ == '__main__':
         #
         # instead.
         model = model_from_json(jfile.read())
+
+    with open(args.model, 'r') as jfile:
+        json_data = json.load(jfile)
+        input_shape = json_data["config"][0]["config"]["batch_input_shape"]
+        target_height = input_shape[1]
+        target_width = input_shape[2]
 
     model.compile("adam", "mse")
     weights_file = args.model.replace('json', 'h5')
