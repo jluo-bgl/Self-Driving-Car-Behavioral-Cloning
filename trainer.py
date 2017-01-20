@@ -4,17 +4,18 @@ from keras.optimizers import Adam
 
 
 class Trainer(object):
-    def __init__(self, learning_rate, epoch, multi_process=False, number_of_worker=4):
+    def __init__(self, learning_rate, epoch, dropout=0.5, multi_process=False, number_of_worker=4):
         self.learning_rate = learning_rate
         self.epoch = epoch
         self.multi_process = multi_process
         self.number_of_worker = number_of_worker
+        self.dropout = dropout
 
-    def generate_model(self, input_shape):
-        return nvida1(input_shape)
+    def generate_model(self, input_shape, dropout):
+        return nvida1(input_shape, dropout)
 
     def fit(self, generator, input_shape):
-        model = self.generate_model(input_shape)
+        model = self.generate_model(input_shape, self.dropout)
         model.summary()
 
         checkpointer = ModelCheckpoint(
