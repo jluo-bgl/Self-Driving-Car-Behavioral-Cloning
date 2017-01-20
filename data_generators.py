@@ -55,6 +55,19 @@ def pipe_line_generators(*generators):
     return _generator
 
 
+def filter_generator(generator, angle_threshold=0.1):
+    def _generator(feeding_data):
+        image, angle = None, None
+        for index in range(20):
+            if angle is None or angle <= angle_threshold:
+                image, angle = generator(feeding_data)
+            else:
+                break
+
+        return image, angle
+
+    return _generator
+
 def _shift_image(image, steer, left_right_shift_range, top_bottom_shift_range):
     shift_size = round(left_right_shift_range * np.random.uniform(-0.5, 0.5))
     steer_ang = steer + shift_size * 0.003

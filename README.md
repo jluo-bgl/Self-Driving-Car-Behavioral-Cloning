@@ -159,3 +159,17 @@ data_generator = DataGenerator(
 
 
 ###Iteration 6 Flip Image
+```python
+data_generator = DataGenerator(
+    random_generators(
+        random_center_left_right_image_generator,
+        pipe_line_generators(
+            center_image_generator,
+            shift_image_generator
+        ),
+        pipe_line_generators(
+            random_center_left_right_image_generator,
+            flip_generator
+        )
+    ))
+```
