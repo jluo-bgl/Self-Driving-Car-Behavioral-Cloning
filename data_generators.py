@@ -16,9 +16,13 @@ def right_image_generator(drive_record):
     return drive_record.right_image(), drive_record.steering_angle - 0.25
 
 
-def shift_image_generator(feeding_data):
-    image, angle, _ = _shift_image(feeding_data.image(), feeding_data.steering_angle, 80, 20)
-    return image, angle
+def shift_image_generator(angle_offset_pre_pixel=0.003):
+    def _generator(feeding_data):
+        image, angle, _ = _shift_image(
+            feeding_data.image(), feeding_data.steering_angle, 80, 20, angle_offset_pre_pixel=angle_offset_pre_pixel)
+        return image, angle
+
+    return _generator
 
 
 def random_center_left_right_image_generator(drive_record):
@@ -68,9 +72,10 @@ def filter_generator(generator, angle_threshold=0.1):
 
     return _generator
 
-def _shift_image(image, steer, left_right_shift_range, top_bottom_shift_range):
+
+def _shift_image(image, steer, left_right_shift_range, top_bottom_shift_range, angle_offset_pre_pixel=0.003):
     shift_size = round(left_right_shift_range * np.random.uniform(-0.5, 0.5))
-    steer_ang = steer + shift_size * 0.003
+    steer_ang = steer + shift_size * angle_offset_pre_pixel
     top_bottom_shift_size = round(top_bottom_shift_range * np.random.uniform(-0.5, 0.5))
     image_tr = scipy.ndimage.interpolation.shift(image, (top_bottom_shift_size, shift_size, 0))
     return image_tr, steer_ang, shift_size
