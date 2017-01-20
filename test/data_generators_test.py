@@ -1,8 +1,8 @@
 import unittest
 import numpy.testing
 import numpy as np
-from data_load import FeedingData
-from data_generators import _shift_image, pipe_line_generators, random_generators
+from data_load import FeedingData, DriveDataSet
+from data_generators import _shift_image, pipe_line_generators, random_generators, flip_generator
 
 
 class TestGeneratorFuncs(unittest.TestCase):
@@ -48,4 +48,10 @@ class TestGeneratorFuncs(unittest.TestCase):
         image, angle = generator(FeedingData([[[1, 1, 1]]], 2))
         np.testing.assert_almost_equal(image, [[[1, 1, 1]]])
         self.assertEqual(angle, 6)
+
+    def test_flip_generator(self):
+        record = FeedingData(np.array([[[1, 1, 1], [2, 2, 2]]]), 0.1)
+        image, angle = flip_generator(record)
+        np.testing.assert_almost_equal(image, [[[2, 2, 2], [1, 1, 1]]])
+        self.assertEqual(-0.1, angle)
 
