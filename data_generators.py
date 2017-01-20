@@ -52,7 +52,7 @@ def pipe_line_generators(*generators):
 
 def _shift_image(image, steer, left_right_shift_range, top_bottom_shift_range):
     shift_size = round(left_right_shift_range * np.random.uniform(-0.5, 0.5))
-    steer_ang = steer + shift_size * 0.003
+    steer_ang = steer + shift_size * 0.0035
     top_bottom_shift_size = round(top_bottom_shift_range * np.random.uniform(-0.5, 0.5))
     image_tr = scipy.ndimage.interpolation.shift(image, (top_bottom_shift_size, shift_size, 0))
     return image_tr, steer_ang, shift_size
