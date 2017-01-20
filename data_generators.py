@@ -59,6 +59,19 @@ def pipe_line_generators(*generators):
     return _generator
 
 
+def pipe_line_random_generators(*generators):
+    def _generator(feeding_data):
+        count = np.random.randint(0, len(generators))
+        intermediary_feeding_data = feeding_data
+        for index in range(count):
+            generator = generators[index]
+            image, angle = generator(intermediary_feeding_data)
+            intermediary_feeding_data = FeedingData(image, angle)
+        return intermediary_feeding_data.image(), intermediary_feeding_data.steering_angle
+
+    return _generator
+
+
 def filter_generator(generator, angle_threshold=0.1):
     def _generator(feeding_data):
         image, angle = None, None
