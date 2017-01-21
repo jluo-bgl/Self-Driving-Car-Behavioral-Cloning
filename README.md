@@ -173,3 +173,12 @@ data_generator = DataGenerator(
         )
     ))
 ```
+
+###Iteration 7 The dropout to rescue
+0.5 Droput in every lay improved the performance much better
+
+
+###Iteration 8 Convert generator to batch model and convert into Tensorflow 
+after add flip image, it took 2 minutes for every epoch, which is still too long for me.
+most of the time, my GPU is waiting for image to been generated. 
+convert the augment into tensorflow to do it in batch, gpu and true multiple thread

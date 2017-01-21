@@ -4,22 +4,24 @@ from keras.optimizers import Adam
 
 
 class Trainer(object):
-    def __init__(self, learning_rate, epoch, dropout=0.5, multi_process=False, number_of_worker=4):
+    def __init__(self, learning_rate, epoch, dropout=0.5, custom_name="", multi_process=False, number_of_worker=4):
         self.learning_rate = learning_rate
         self.epoch = epoch
         self.multi_process = multi_process
         self.number_of_worker = number_of_worker
         self.dropout = dropout
+        self.model_name = "model_{}_lr{}_epoch{}_dropout{}".format(custom_name, learning_rate, epoch, dropout)
 
     def generate_model(self, input_shape, dropout):
         return nvida1(input_shape, dropout)
 
     def fit(self, generator, input_shape):
+        final_model_name = self.model_name + "_{}x{}x{}".format(*input_shape)
         model = self.generate_model(input_shape, self.dropout)
         model.summary()
 
         checkpointer = ModelCheckpoint(
-            filepath="model.h5",
+            filepath=final_model_name + "_current_{epoch:02d}.h5",
             save_weights_only=True,
             verbose=1
         )
@@ -32,7 +34,7 @@ class Trainer(object):
         print('Starting training')
 
         model_json = model.to_json()
-        with open("model.json", "w") as json_file:
+        with open(final_model_name + ".json", "w") as json_file:
             json_file.write(model_json)
 
         model.fit_generator(generator, samples_per_epoch=16384,

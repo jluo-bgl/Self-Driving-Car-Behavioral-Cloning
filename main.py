@@ -18,7 +18,7 @@ data_generator = DataGenerator(
             shift_image_generator()
         )
     ))
-Trainer(learning_rate=0.0001, epoch=10, dropout=0.75).fit(
+Trainer(learning_rate=0.0001, epoch=10, dropout=0.5).fit(
     data_generator.generate(dataset, batch_size=128),
     input_shape=dataset.output_shape()
 )
