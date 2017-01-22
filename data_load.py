@@ -186,7 +186,7 @@ class DriveDataSet(object):
 
     @staticmethod
     def records_to_straight_left_right(feeding_data_list):
-        straight_angle = 0.1
+        straight_angle = 0.2
         straight = [record for record in feeding_data_list if -straight_angle <= record.steering_angle <= straight_angle]
         left = [record for record in feeding_data_list if record.steering_angle > straight_angle]
         right = [record for record in feeding_data_list if record.steering_angle < -straight_angle]
