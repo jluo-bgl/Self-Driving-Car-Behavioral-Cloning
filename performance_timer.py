@@ -2,7 +2,7 @@ import time
 
 
 class Timer(object):
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=True):
         self.verbose = verbose
 
     def __enter__(self):

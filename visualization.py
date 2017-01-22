@@ -2,6 +2,9 @@ import numpy as np
 from moviepy.editor import VideoClip, ImageSequenceClip, CompositeVideoClip, TextClip, concatenate_videoclips, \
     ImageClip, clips_array
 from data_load import FeedingData, DriveDataSet
+import numpy as np
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
 
 
 class Video(object):
@@ -50,3 +53,29 @@ class Video(object):
             ]))
         final = concatenate_videoclips(frames)
         final.write_videofile(file_name, fps=10)
+
+
+class Plot(object):
+    @staticmethod
+    def angle_distribution(angles):
+        mu = 0  # mean of distribution
+        sigma = 1  # standard deviation of distribution
+        x = angles
+
+        num_bins = 200
+
+        fig, ax = plt.subplots()
+
+        # the histogram of the data
+        n, bins, patches = ax.hist(x, num_bins, normed=1)
+
+        # add a 'best fit' line
+        y = mlab.normpdf(bins, mu, sigma)
+        ax.plot(bins, y, '--')
+        ax.set_xlabel('Angles')
+        ax.set_ylabel('Probability density')
+        ax.set_title('Histogram of Angles Sample Size {}'.format(len(angles)))
+
+        # Tweak spacing to prevent clipping of ylabel
+        fig.tight_layout()
+        return plt

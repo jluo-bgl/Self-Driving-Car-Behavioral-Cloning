@@ -4,16 +4,8 @@ import scipy.ndimage
 from data_load import FeedingData
 
 
-def center_image_generator(drive_record):
-    return drive_record.center_image(), drive_record.steering_angle
-
-
-def left_image_generator(drive_record):
-    return drive_record.left_image(), drive_record.steering_angle + 0.25
-
-
-def right_image_generator(drive_record):
-    return drive_record.right_image(), drive_record.steering_angle - 0.25
+def image_itself(feeding_data):
+    return feeding_data.image(), feeding_data.steering_angle
 
 
 def shift_image_generator(angle_offset_pre_pixel=0.003):
@@ -23,11 +15,6 @@ def shift_image_generator(angle_offset_pre_pixel=0.003):
         return image, angle
 
     return _generator
-
-
-def random_center_left_right_image_generator(drive_record):
-    generator = random_generators(center_image_generator, left_image_generator, right_image_generator)
-    return generator(drive_record)
 
 
 def random_generators(*generators):

@@ -3,8 +3,11 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 from performance_timer import Timer
 
+CROP_HEIGHT = 66
+CROP_WIDTH = 200
 
 def full_file_name(base_folder, image_file_name):
     return base_folder + "/" + image_file_name.strip()
@@ -25,6 +28,10 @@ def _crop_image(img, new_height=66, new_width=200):
     return img[y_start:y_start + new_height, x_start:x_start + new_width]
 
 
+def _flatten(listoflists):
+    return [item for list in listoflists for item in list]
+
+
 class FeedingData(object):
     def __init__(self, image, steering_angle):
         self._image = image
@@ -34,7 +41,7 @@ class FeedingData(object):
         return self._image
 
 
-class DriveRecord(FeedingData):
+class DriveRecord(object):
     """
     One Record is the actual record from CAR, it is a event happened past, immutable and no one is going to
     modify it.
@@ -49,12 +56,11 @@ class DriveRecord(FeedingData):
         :param crop_image: crop to 66*200 or not, only crop if image larger then 66*200
         """
         # index,center,left,right,steering,throttle,brake,speed
-        super().__init__(None, csv_data_frame_row[4])
-
         self.index = csv_data_frame_row[0]
         self.center_file_name = full_file_name(base_folder, csv_data_frame_row[1])
         self.left_file_name = full_file_name(base_folder, csv_data_frame_row[2])
         self.right_file_name = full_file_name(base_folder, csv_data_frame_row[3])
+        self.steering_angle = csv_data_frame_row[4]
 
         self.crop_image = crop_image
 
@@ -90,20 +96,53 @@ class DriveRecord(FeedingData):
         return image
 
 
+def drive_record_filter_include_all(last_added_records, current_drive_record):
+    return current_drive_record
+
+
+def drive_record_filter_exclude_zeros(last_added_records, current_drive_record):
+    if abs(current_drive_record.steering_angle) > 0.02:
+        return current_drive_record
+    else:
+        return None
+
+
+def drive_record_filter_exclude_small_angles(last_added_records, current_drive_record):
+    """
+    The filter method which drive record you want add into training samples
+    :param last_added_records: last x records we just added in, this could change, you have to check the length
+    :param current_drive_record: the DriveRecord do you want add in
+    :return: DriveRecord to add into training sample, None if don't want, you can change the DriveRecord if you want
+    """
+    if abs(current_drive_record.steering_angle) < 0.02:
+        how_many_small_angles = 0
+        for record in last_added_records:
+            if abs(record.steering_angle) < 0.02:
+                how_many_small_angles += 1
+        if how_many_small_angles >= 2:
+            return None
+    return current_drive_record
+
+
 class DriveDataSet(object):
     """
     DriveDataSet represent multiple Records together, you can access any record by [index] or iterate through
     As it represent past, it's immutable as well
     """
-    def __init__(self, file_name, crop_images=False):
+    def __init__(self, file_name, crop_images=False, filter_method=drive_record_filter_exclude_small_angles):
         self.base_folder = os.path.split(file_name)[0]
         # center,left,right,steering,throttle,brake,speed
         self.data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
-        self.records = list(map(
+        _records = list(map(
             lambda index: DriveRecord(self.base_folder,
                                       self.data_frame.iloc[[index]].reset_index().values[0],
                                       crop_images),
             range(len(self.data_frame))))
+        self.records = self.drive_record_to_feeding_data(_records, filter_method)
+        straight, left, right = self.records_to_straight_left_right(self.records)
+        self.straight_records = straight
+        self.left_records = left
+        self.right_records = right
 
     def __getitem__(self, n):
         return self.records[n]
@@ -114,8 +153,43 @@ class DriveDataSet(object):
     def __len__(self):
         return len(self.records)
 
+    def angles(self):
+        return [feeding_data.steering_angle for feeding_data in self.records]
+
     def output_shape(self):
         return self.records[0].image().shape
+
+    @staticmethod
+    def drive_record_to_feeding_data(records, filter_method):
+        # def process_stack(image):
+        #     distorted_image = image
+        #     if crop_images:
+        #         distorted_image = tf.image.resize_image_with_crop_or_pad(image, CROP_HEIGHT, CROP_WIDTH)
+        #
+        #     return distorted_image
+
+        feeding_data_list = []
+        last_5_added = []
+        for driving_record in records:
+            filtered_record = filter_method(last_5_added, driving_record)
+            if filtered_record is not None:
+                if len(last_5_added) >= 5:
+                    last_5_added.pop(0)
+                last_5_added.append(driving_record)
+                feeding_data_list.append(FeedingData(driving_record.center_image(), driving_record.steering_angle))
+                feeding_data_list.append(FeedingData(driving_record.left_image(), driving_record.steering_angle + 0.25))
+                feeding_data_list.append(FeedingData(driving_record.right_image(), driving_record.steering_angle - 0.25))
+
+        # tensor = tf.map_fn(lambda image: process_stack(image), records, dtype=dtypes.uint8)
+        # return tf.Session().run(tensor)
+        return feeding_data_list
+
+    @staticmethod
+    def records_to_straight_left_right(feeding_data_list):
+        straight = [record for record in feeding_data_list if -0.05 <= record.steering_angle <= 0.05]
+        left = [record for record in feeding_data_list if record.steering_angle > 0.05]
+        right = [record for record in feeding_data_list if record.steering_angle < -0.05]
+        return straight, left, right
 
 
 class DataGenerator(object):
@@ -134,6 +208,18 @@ class DataGenerator(object):
                 batch_images[i_batch] = x
                 batch_steering[i_batch] = y
             yield batch_images, batch_steering
+
+    def next_batch(self, data_set, batch_size):
+        input_shape = data_set.output_shape()
+        batch_images = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
+        batch_steering = np.zeros(batch_size)
+        for i_batch in range(batch_size):
+            index = np.random.randint(len(data_set))
+            # with Timer(True):
+            x, y = self.custom_generator(data_set[index])
+            batch_images[i_batch] = x
+            batch_steering[i_batch] = y
+        yield batch_images, batch_steering
 
 
 class DrivingDataLoader(object):

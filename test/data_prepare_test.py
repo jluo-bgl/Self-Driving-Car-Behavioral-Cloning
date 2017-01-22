@@ -49,6 +49,23 @@ class TestDriveDataProvider(unittest.TestCase):
 
 class TestDriveDataSet(unittest.TestCase):
     def test_data_generator_should_able_to_extend_easily(self):
+        dataset = DriveDataSet("resources/driving_log_mini.csv")
+        self.assertEqual(len(dataset), 6)
+        self.assertEqual(len(dataset.left_records), 4)
+        self.assertEqual(len(dataset.right_records), 2)
+        self.assertEqual(len(dataset.straight_records), 0)
+
+    def test_data_generator_should_able_to_extend_easily(self):
+        def center_image_generator(dataset_row):
+            return dataset_row.image(), dataset_row.steering_angle
+
+        dataset = DriveDataSet("resources/driving_log_mini.csv")
+        data_generator = DataGenerator(center_image_generator)
+        generator = data_generator.generate(dataset, 4)
+        x, y = next(generator)
+        self.assertEqual(len(x), 4, "should have 4 images")
+
+    def test_data_generator_should_have_even_distribution_between_straight_right_left(self):
         def center_image_generator(dataset_row):
             return dataset_row.center_image(), dataset_row.steering_angle
 
