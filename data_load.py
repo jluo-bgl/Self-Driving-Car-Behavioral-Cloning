@@ -186,40 +186,53 @@ class DriveDataSet(object):
 
     @staticmethod
     def records_to_straight_left_right(feeding_data_list):
-        straight = [record for record in feeding_data_list if -0.05 <= record.steering_angle <= 0.05]
-        left = [record for record in feeding_data_list if record.steering_angle > 0.05]
-        right = [record for record in feeding_data_list if record.steering_angle < -0.05]
+        straight_angle = 0.1
+        straight = [record for record in feeding_data_list if -straight_angle <= record.steering_angle <= straight_angle]
+        left = [record for record in feeding_data_list if record.steering_angle > straight_angle]
+        right = [record for record in feeding_data_list if record.steering_angle < -straight_angle]
         return straight, left, right
+
+
+def _random_access_list(data_list, size):
+    random_ids = np.random.randint(0, len(data_list), size)
+    return [data_list[index] for index in random_ids]
+
+
+def record_allocation_random(batch_size, all_records, left_angles, center_angles, right_angles):
+    return _random_access_list(all_records, batch_size)
+
+
+def record_allocation_angle_type(left_percentage, right_percentage):
+    def _impl(batch_size, all_records, left_angles, center_angles, right_angles):
+        left_size = batch_size * left_percentage // 100
+        right_size = batch_size * right_percentage // 100
+        center_size = batch_size - left_size - right_size
+
+        return _random_access_list(center_angles, center_size) + \
+               _random_access_list(left_angles, left_size) + \
+               _random_access_list(right_angles, right_size)
+    return _impl
 
 
 class DataGenerator(object):
     def __init__(self, custom_generator):
         self.custom_generator = custom_generator
 
-    def generate(self, data_set, batch_size=32):
+    def generate(self, data_set, batch_size=32, record_allocation_method=record_allocation_random):
         input_shape = data_set.output_shape()
         batch_images = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
         batch_steering = np.zeros(batch_size)
         while 1:
-            for i_batch in range(batch_size):
-                index = np.random.randint(len(data_set))
-                # with Timer(True):
-                x, y = self.custom_generator(data_set[index])
+            selected_records = record_allocation_method(
+                batch_size, data_set.records,
+                data_set.left_records, data_set.straight_records, data_set.right_records)
+            i_batch = 0
+            for record in selected_records:
+                x, y = self.custom_generator(record)
                 batch_images[i_batch] = x
                 batch_steering[i_batch] = y
+                i_batch += 1
             yield batch_images, batch_steering
-
-    def next_batch(self, data_set, batch_size):
-        input_shape = data_set.output_shape()
-        batch_images = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
-        batch_steering = np.zeros(batch_size)
-        for i_batch in range(batch_size):
-            index = np.random.randint(len(data_set))
-            # with Timer(True):
-            x, y = self.custom_generator(data_set[index])
-            batch_images[i_batch] = x
-            batch_steering[i_batch] = y
-        yield batch_images, batch_steering
 
 
 class DrivingDataLoader(object):

@@ -1,7 +1,7 @@
 import unittest
 import numpy.testing
 import numpy as np
-from data_load import FeedingData
+from data_load import FeedingData, record_allocation_random, record_allocation_angle_type
 from data_load import DriveDataProvider, DrivingDataLoader, DriveDataSet, DataGenerator, \
     drive_record_filter_exclude_small_angles, drive_record_filter_include_all, drive_record_filter_exclude_zeros
 from data_generators import image_itself, \
@@ -44,41 +44,52 @@ class TestVideos(unittest.TestCase):
 
 
 class TestPlot(unittest.TestCase):
+    def create_real_dataset(self, filter_method):
+        return DriveDataSet(
+            "../datasets/udacity-sample-track-1/driving_log.csv",
+            filter_method=filter_method
+        )
     def test_angle_distribution(self):
         with Timer():
-            dataset = DriveDataSet(
-                "../datasets/udacity-sample-track-1/driving_log.csv", filter_method=drive_record_filter_include_all)
+            dataset = self.create_real_dataset(filter_method=drive_record_filter_include_all)
         plt = Plot.angle_distribution(dataset.angles())
         plt.savefig("resources/angle_distribution.jpg")
 
     def test_angle_distribution_after_filterout_small_angles(self):
         with Timer():
-            dataset = DriveDataSet(
-                "../datasets/udacity-sample-track-1/driving_log.csv",
-                filter_method=drive_record_filter_exclude_small_angles
-            )
+            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
         plt = Plot.angle_distribution(dataset.angles())
         plt.savefig("resources/angle_distribution_exclude_small_angles.jpg")
 
     def test_angle_distribution_after_filterout_zeros(self):
         with Timer():
-            dataset = DriveDataSet(
-                "../datasets/udacity-sample-track-1/driving_log.csv",
-                filter_method=drive_record_filter_exclude_zeros
-            )
+            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_zeros)
         plt = Plot.angle_distribution(dataset.angles())
         plt.savefig("resources/angle_distribution_exclude_zero_angles.jpg")
 
     def test_angle_distribution_generator(self):
         with Timer():
-            dataset = DriveDataSet("../datasets/udacity-sample-track-1/driving_log.csv")
-            # dataset = DriveDataSet("resources/driving_log_mini.csv")
+            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
         generator = pipe_line_random_generators(
             image_itself,
-            shift_image_generator(angle_offset_pre_pixel=0.005),
+            shift_image_generator(angle_offset_pre_pixel=0.003),
             flip_generator
         )
         data_generator = DataGenerator(generator)
-        image, angles = next(data_generator.next_batch(dataset, 10000))
+        image, angles = next(data_generator.generate(dataset, 10000, record_allocation_method=record_allocation_random))
         plt = Plot.angle_distribution(angles)
         plt.savefig("resources/angle_distribution_generator.jpg")
+
+    def test_angle_distribution_generator_(self):
+        with Timer():
+            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
+        generator = pipe_line_random_generators(
+            image_itself,
+            shift_image_generator(angle_offset_pre_pixel=0.003),
+            flip_generator
+        )
+        data_generator = DataGenerator(generator)
+        image, angles = next(data_generator.generate(dataset, 10000,
+                                                     record_allocation_method=record_allocation_angle_type(40, 40)))
+        plt = Plot.angle_distribution(angles)
+        plt.savefig("resources/angle_distribution_generator_angle_40%_20%_40%.jpg")
