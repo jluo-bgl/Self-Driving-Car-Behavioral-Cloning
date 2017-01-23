@@ -48,7 +48,7 @@ def pipe_line_generators(*generators):
 
 def pipe_line_random_generators(*generators):
     def _generator(feeding_data):
-        count = np.random.randint(0, len(generators))
+        count = np.random.randint(0, len(generators)+1)
         intermediary_feeding_data = feeding_data
         for index in range(count):
             generator = generators[index]

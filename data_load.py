@@ -119,7 +119,7 @@ def drive_record_filter_exclude_small_angles(last_added_records, current_drive_r
         for record in last_added_records:
             if abs(record.steering_angle) < 0.01:
                 how_many_small_angles += 1
-        if how_many_small_angles >= 2:
+        if how_many_small_angles >= 1:
             return None
     return current_drive_record
 
