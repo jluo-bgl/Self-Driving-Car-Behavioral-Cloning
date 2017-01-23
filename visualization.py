@@ -32,10 +32,10 @@ class Video(object):
         dataset = drive_data_set
         frames = []
         duration_pre_image = 0.1
-        total = len(dataset)
+        total = len(dataset.drive_records)
         for index in range(0, total, 4):
             print("working {}/{}".format(index + 1, total))
-            record = dataset[index]
+            record = dataset.drive_records[index]
             image, angle = record.image(), record.steering_angle
             text = TextClip(txt="angle:{:.2f}".format(angle),
                             method="caption", align="North",
@@ -46,7 +46,7 @@ class Video(object):
             left_image_clip = ImageClip(record.left_image(), duration=duration_pre_image)
             right_image_clip = ImageClip(record.right_image(), duration=duration_pre_image)
 
-            all_images_clip = clips_array([[left_image_clip, center_image_clip, right_image_clip]])
+            all_images_clip = clips_array([[center_image_clip], [left_image_clip], [right_image_clip]])
             frames.append(CompositeVideoClip([
                 all_images_clip,
                 text
@@ -62,7 +62,7 @@ class Plot(object):
         sigma = 1  # standard deviation of distribution
         x = angles
 
-        num_bins = 200
+        num_bins = 80
 
         fig, ax = plt.subplots()
 
@@ -74,7 +74,7 @@ class Plot(object):
         ax.plot(bins, y, '--')
         ax.set_xlabel('Angles')
         ax.set_ylabel('Probability density')
-        ax.set_title('Histogram of Angles Sample Size {}'.format(len(angles)))
+        ax.set_title('Histogram of Angles Sample Size {}'.format() + len(angles))
 
         # Tweak spacing to prevent clipping of ylabel
         fig.tight_layout()

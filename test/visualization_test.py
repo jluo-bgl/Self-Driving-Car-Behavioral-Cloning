@@ -39,7 +39,8 @@ class TestVideos(unittest.TestCase):
 
     def test_create_sample_data_corp_video(self):
         Video.from_udacity_sample_data(
-            DriveDataSet("../datasets/udacity-sample-track-1/driving_log.csv", crop_images=True),
+            DriveDataSet("../datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
+                         filter_method=drive_record_filter_exclude_small_angles),
             "resources/sample_crop.mp4")
 
 
@@ -80,7 +81,7 @@ class TestPlot(unittest.TestCase):
         plt = Plot.angle_distribution(angles)
         plt.savefig("resources/angle_distribution_generator.jpg")
 
-    def test_angle_distribution_generator_(self):
+    def test_angle_distribution_generator_exclude_small_angles(self):
         with Timer():
             dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
         generator = pipe_line_random_generators(
@@ -93,3 +94,17 @@ class TestPlot(unittest.TestCase):
                                                      record_allocation_method=record_allocation_angle_type(40, 40)))
         plt = Plot.angle_distribution(angles)
         plt.savefig("resources/angle_distribution_generator_angle_40%_20%_40%.jpg")
+
+    def test_angle_distribution_generator_exclude_small_angles_30_40_30(self):
+        with Timer():
+            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
+        generator = pipe_line_random_generators(
+            image_itself,
+            shift_image_generator(angle_offset_pre_pixel=0.002),
+            flip_generator
+        )
+        data_generator = DataGenerator(generator)
+        image, angles = next(data_generator.generate(dataset, 10000,
+                                                     record_allocation_method=record_allocation_angle_type(30, 30)))
+        plt = Plot.angle_distribution(angles)
+        plt.savefig("resources/angle_distribution_generator_exclude_duplicated_small_angles_30_40_30.jpg")

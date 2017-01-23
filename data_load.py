@@ -133,12 +133,12 @@ class DriveDataSet(object):
         self.base_folder = os.path.split(file_name)[0]
         # center,left,right,steering,throttle,brake,speed
         self.data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
-        _records = list(map(
+        self.drive_records = list(map(
             lambda index: DriveRecord(self.base_folder,
                                       self.data_frame.iloc[[index]].reset_index().values[0],
                                       crop_images),
             range(len(self.data_frame))))
-        self.records = self.drive_record_to_feeding_data(_records, filter_method)
+        self.records = self.drive_record_to_feeding_data(self.drive_records, filter_method)
         straight, left, right = self.records_to_straight_left_right(self.records)
         self.straight_records = straight
         self.left_records = left
@@ -186,7 +186,7 @@ class DriveDataSet(object):
 
     @staticmethod
     def records_to_straight_left_right(feeding_data_list):
-        straight_angle = 0.2
+        straight_angle = 0.1
         straight = [record for record in feeding_data_list if -straight_angle <= record.steering_angle <= straight_angle]
         left = [record for record in feeding_data_list if record.steering_angle > straight_angle]
         right = [record for record in feeding_data_list if record.steering_angle < -straight_angle]
