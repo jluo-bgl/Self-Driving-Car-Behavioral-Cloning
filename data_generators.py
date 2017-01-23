@@ -32,6 +32,30 @@ def brightness_image_generator(brightness_range=0.25):
     return _generator
 
 
+def shadow_generator(feeding_data):
+    image = feeding_data.image()
+    top_y = image.shape[1] * np.random.uniform()
+    top_x = 0
+    bot_x = image.shape[0]
+    bot_y = image.shape[1] * np.random.uniform()
+    image_hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+    shadow_mask = 0 * image_hls[:, :, 1]
+    X_m = np.mgrid[0:image.shape[0], 0:image.shape[1]][0]
+    Y_m = np.mgrid[0:image.shape[0], 0:image.shape[1]][1]
+
+    shadow_mask[((X_m - top_x) * (bot_y - top_y) - (bot_x - top_x) * (Y_m - top_y) >= 0)] = 1
+    if np.random.randint(2) == 1:
+        random_bright = .5
+        cond1 = shadow_mask == 1
+        cond0 = shadow_mask == 0
+        if np.random.randint(2) == 1:
+            image_hls[:, :, 1][cond1] = image_hls[:, :, 1][cond1] * random_bright
+        else:
+            image_hls[:, :, 1][cond0] = image_hls[:, :, 1][cond0] * random_bright
+    image = cv2.cvtColor(image_hls, cv2.COLOR_HLS2RGB)
+    return image, feeding_data.steering_angle
+
+
 def random_generators(*generators):
     def _generator(feeding_data):
         index = np.random.randint(0, len(generators))

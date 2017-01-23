@@ -4,7 +4,7 @@ import numpy as np
 from data_load import FeedingData, record_allocation_random, record_allocation_angle_type
 from data_load import DrivingDataLoader, DriveDataSet, DataGenerator, \
     drive_record_filter_exclude_small_angles, drive_record_filter_include_all, drive_record_filter_exclude_zeros
-from data_generators import image_itself, brightness_image_generator, \
+from data_generators import image_itself, brightness_image_generator, shadow_generator, \
      shift_image_generator, random_generators, pipe_line_generators, pipe_line_random_generators, flip_generator
 from visualization import Video, Plot
 from performance_timer import Timer
@@ -17,7 +17,8 @@ class TestVideos(unittest.TestCase):
         generator = pipe_line_generators(
             image_itself,
             shift_image_generator(angle_offset_pre_pixel=0.006),
-            brightness_image_generator(0.25)
+            brightness_image_generator(0.25),
+            shadow_generator
         )
         Video.from_generators("resources/generator_pipe_line.gif", dataset[60], 20, generator)
 
