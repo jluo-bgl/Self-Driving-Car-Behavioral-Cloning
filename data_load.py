@@ -114,10 +114,10 @@ def drive_record_filter_exclude_small_angles(last_added_records, current_drive_r
     :param current_drive_record: the DriveRecord do you want add in
     :return: DriveRecord to add into training sample, None if don't want, you can change the DriveRecord if you want
     """
-    if abs(current_drive_record.steering_angle) < 0.02:
+    if abs(current_drive_record.steering_angle) < 0.01:
         how_many_small_angles = 0
         for record in last_added_records:
-            if abs(record.steering_angle) < 0.02:
+            if abs(record.steering_angle) < 0.01:
                 how_many_small_angles += 1
         if how_many_small_angles >= 2:
             return None
@@ -228,12 +228,14 @@ class DataGenerator(object):
                 data_set.left_records, data_set.straight_records, data_set.right_records)
             i_batch = 0
             for record in selected_records:
-                while True:
+                for retry in range(50):
                     x, y = self.custom_generator(record)
                     batch_images[i_batch] = x
                     batch_steering[i_batch] = y
                     if abs(y) < 1.:
                         break
+                    if retry > 20:
+                        print("angle {} retrying {}".format(y, retry))
                 i_batch += 1
             yield batch_images, batch_steering
 
