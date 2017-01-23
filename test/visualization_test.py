@@ -4,7 +4,7 @@ import numpy as np
 from data_load import FeedingData, record_allocation_random, record_allocation_angle_type
 from data_load import DrivingDataLoader, DriveDataSet, DataGenerator, \
     drive_record_filter_exclude_small_angles, drive_record_filter_include_all, drive_record_filter_exclude_zeros
-from data_generators import image_itself, \
+from data_generators import image_itself, brightness_image_generator, \
      shift_image_generator, random_generators, pipe_line_generators, pipe_line_random_generators, flip_generator
 from visualization import Video, Plot
 from performance_timer import Timer
@@ -16,9 +16,10 @@ class TestVideos(unittest.TestCase):
 
         generator = pipe_line_generators(
             image_itself,
-            shift_image_generator(angle_offset_pre_pixel=0.002)
+            shift_image_generator(angle_offset_pre_pixel=0.006),
+            brightness_image_generator(0.25)
         )
-        Video.from_generators("resources/shift_center_images.gif", dataset[60], 20, generator)
+        Video.from_generators("resources/generator_pipe_line.gif", dataset[60], 20, generator)
 
         # generator = pipe_line_generators(
         #     left_image_generator,
@@ -104,15 +105,16 @@ class TestPlot(unittest.TestCase):
 
     def test_angle_distribution_generator_45_10_45_pipe_line(self):
         generator = pipe_line_generators(
-            shift_image_generator(angle_offset_pre_pixel=0.002),
-            flip_generator
+            shift_image_generator(angle_offset_pre_pixel=0.006),
+            flip_generator,
+            brightness_image_generator(0.25)
         )
         self._angle_distribution(
             "angle_distribution_generator_exclude_duplicated_small_angles_40_20_40_pipe_line", 100, 256,
             filter_method=drive_record_filter_exclude_small_angles,
             left_percentage=40,
             right_percentage=40,
-            angle_offset_pre_pixel=0.002,
+            angle_offset_pre_pixel=0.006,
             generator=generator
         )
 

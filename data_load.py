@@ -93,7 +93,7 @@ class DriveRecord(object):
 
     def read_image(self, file_name):
         if self.fake_image:
-            return np.array([[[1, 1, 1]]])
+            return np.array([[[1, 1, 1]]]).astype(np.uint8)
         image = read_image_from_file(file_name)
         if self.crop_image:
             image = _crop_image(image, 66, 200)

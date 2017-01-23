@@ -17,6 +17,21 @@ def shift_image_generator(angle_offset_pre_pixel=0.003):
     return _generator
 
 
+def brightness_image_generator(brightness_range=0.25):
+    def _generator(feeding_data):
+        img = feeding_data.image()
+        # Convert the image to HSV
+        temp = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+        # Compute a random brightness value and apply to the image
+        brightness = brightness_range + np.random.uniform()
+        temp[:, :, 2] = temp[:, :, 2] * brightness
+
+        # Convert back to RGB and return
+        return cv2.cvtColor(temp, cv2.COLOR_HSV2RGB), feeding_data.steering_angle
+
+    return _generator
+
+
 def random_generators(*generators):
     def _generator(feeding_data):
         index = np.random.randint(0, len(generators))

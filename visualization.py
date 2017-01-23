@@ -60,7 +60,7 @@ class Plot(object):
     @staticmethod
     def angle_distribution(angles):
         mu = 0  # mean of distribution
-        sigma = 1  # standard deviation of distribution
+        sigma = 0.4  # standard deviation of distribution
         x = angles
 
         num_bins = 500

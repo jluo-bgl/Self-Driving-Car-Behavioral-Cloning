@@ -42,8 +42,10 @@ def telemetry(sid, data):
     # The current image from the center camera of the car
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
+    # image.save('out.jpg')
     image_array = np.asarray(image)
     image_array = _crop_image(image_array, target_height, target_width)
+    # Image.fromarray(image_array).save('out_cropped.jpg')
     transformed_image_array = image_array[None, :, :, :]
 
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
