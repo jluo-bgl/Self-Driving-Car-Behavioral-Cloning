@@ -232,7 +232,7 @@ class DataGenerator(object):
                     x, y = self.custom_generator(record)
                     batch_images[i_batch] = x
                     batch_steering[i_batch] = y
-                    if y < 1.:
+                    if abs(y) < 1.:
                         break
                 i_batch += 1
             yield batch_images, batch_steering
