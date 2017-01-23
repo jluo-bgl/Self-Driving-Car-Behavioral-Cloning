@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 class Video(object):
 
     @staticmethod
-    def from_generators(gif_file_name, feeding_data, feeding_angle, how_many_images_to_generate, image_generator):
+    def from_generators(gif_file_name, feeding_data, how_many_images_to_generate, image_generator):
         frames = []
         duration_pre_image = 0.5
+        feeding_angle = feeding_data.steering_angle
         for index in range(how_many_images_to_generate):
             image, angle = image_generator(feeding_data)
             text = TextClip(txt="angle:{:.2f}/{:.2f}".format(feeding_angle, angle),
@@ -62,7 +63,7 @@ class Plot(object):
         sigma = 1  # standard deviation of distribution
         x = angles
 
-        num_bins = 80
+        num_bins = 500
 
         fig, ax = plt.subplots()
 
@@ -74,7 +75,7 @@ class Plot(object):
         ax.plot(bins, y, '--')
         ax.set_xlabel('Angles')
         ax.set_ylabel('Probability density')
-        ax.set_title('Histogram of Angles Sample Size {}'.format() + len(angles))
+        ax.set_title('Histogram of Angles Sample Size {}'.format(len(angles)))
 
         # Tweak spacing to prevent clipping of ylabel
         fig.tight_layout()

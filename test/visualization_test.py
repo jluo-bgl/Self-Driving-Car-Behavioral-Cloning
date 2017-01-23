@@ -16,9 +16,9 @@ class TestVideos(unittest.TestCase):
 
         generator = pipe_line_generators(
             image_itself,
-            shift_image_generator
+            shift_image_generator(angle_offset_pre_pixel=0.002)
         )
-        Video.from_generators("resources/shift_center_images.gif", dataset[60], 0.0, 20, generator)
+        Video.from_generators("resources/shift_center_images.gif", dataset[60], 20, generator)
 
         # generator = pipe_line_generators(
         #     left_image_generator,
@@ -46,66 +46,95 @@ class TestVideos(unittest.TestCase):
 
 
 class TestPlot(unittest.TestCase):
-    def create_real_dataset(self, filter_method):
+    @staticmethod
+    def create_real_dataset(filter_method):
         return DriveDataSet(
             "../datasets/udacity-sample-track-1/driving_log.csv",
-            filter_method=filter_method
+            filter_method=filter_method,
+            fake_image=True
         )
+
     def test_angle_distribution(self):
-        with Timer():
-            dataset = self.create_real_dataset(filter_method=drive_record_filter_include_all)
+        dataset = self.create_real_dataset(filter_method=drive_record_filter_include_all)
         plt = Plot.angle_distribution(dataset.angles())
-        plt.savefig("resources/angle_distribution.jpg")
+        plt.savefig("resources/angle_distribution_original.jpg")
 
     def test_angle_distribution_after_filterout_small_angles(self):
-        with Timer():
-            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
+        dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
         plt = Plot.angle_distribution(dataset.angles())
         plt.savefig("resources/angle_distribution_exclude_small_angles.jpg")
 
     def test_angle_distribution_after_filterout_zeros(self):
-        with Timer():
-            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_zeros)
+        dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_zeros)
         plt = Plot.angle_distribution(dataset.angles())
         plt.savefig("resources/angle_distribution_exclude_zero_angles.jpg")
 
-    def test_angle_distribution_generator(self):
-        with Timer():
-            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
-        generator = pipe_line_random_generators(
-            image_itself,
-            shift_image_generator(angle_offset_pre_pixel=0.003),
-            flip_generator
+    def test_angle_distribution_generator_exclude_duplicated_small_angles_30_40_30(self):
+        self._angle_distribution(
+            "angle_distribution_generator_exclude_duplicated_small_angles_30_40_30", 100, 256,
+            filter_method=drive_record_filter_exclude_small_angles,
+            left_percentage=30,
+            right_percentage=30
         )
-        data_generator = DataGenerator(generator)
-        image, angles = next(data_generator.generate(dataset, 10000, record_allocation_method=record_allocation_random))
-        plt = Plot.angle_distribution(angles)
-        plt.savefig("resources/angle_distribution_generator.jpg")
 
-    def test_angle_distribution_generator_exclude_small_angles(self):
-        with Timer():
-            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
-        generator = pipe_line_random_generators(
-            image_itself,
-            shift_image_generator(angle_offset_pre_pixel=0.003),
-            flip_generator
+    def test_angle_distribution_generator_exclude_duplicated_small_angles_40_20_40(self):
+        self._angle_distribution(
+            "angle_distribution_generator_exclude_duplicated_small_angles_40_20_40", 100, 256,
+            filter_method=drive_record_filter_exclude_small_angles,
+            left_percentage=40,
+            right_percentage=40
         )
-        data_generator = DataGenerator(generator)
-        image, angles = next(data_generator.generate(dataset, 10000,
-                                                     record_allocation_method=record_allocation_angle_type(40, 40)))
-        plt = Plot.angle_distribution(angles)
-        plt.savefig("resources/angle_distribution_generator_angle_40%_20%_40%.jpg")
 
-    def test_angle_distribution_generator_exclude_small_angles_30_40_30(self):
-        with Timer():
-            dataset = self.create_real_dataset(filter_method=drive_record_filter_exclude_small_angles)
-        generator = pipe_line_random_generators(
-            image_itself,
+    def test_angle_distribution_generator_exclude_duplicated_small_angles_40_20_40_004(self):
+        self._angle_distribution(
+            "angle_distribution_generator_exclude_duplicated_small_angles_40_20_40_0.004", 100, 256,
+            filter_method=drive_record_filter_exclude_small_angles,
+            left_percentage=40,
+            right_percentage=40,
+            angle_offset_pre_pixel=0.008
+        )
+
+    def test_angle_distribution_generator_exclude_duplicated_small_angles_45_10_45(self):
+        self._angle_distribution(
+            "angle_distribution_generator_exclude_duplicated_small_angles_45_10_45", 100, 256,
+            filter_method=drive_record_filter_exclude_small_angles,
+            left_percentage=45,
+            right_percentage=45
+        )
+
+    def test_angle_distribution_generator_45_10_45_pipe_line(self):
+        generator = pipe_line_generators(
             shift_image_generator(angle_offset_pre_pixel=0.002),
             flip_generator
         )
+        self._angle_distribution(
+            "angle_distribution_generator_exclude_duplicated_small_angles_45_10_45_pipe_line", 100, 256,
+            filter_method=drive_record_filter_exclude_small_angles,
+            left_percentage=45,
+            right_percentage=45,
+            angle_offset_pre_pixel=0.002,
+            generator=generator
+        )
+
+    def _angle_distribution(
+            self, name, batches, batch_size, filter_method=drive_record_filter_exclude_small_angles,
+            left_percentage=30, right_percentage=30, angle_offset_pre_pixel=0.002, generator=None
+    ):
+        dataset = self.create_real_dataset(filter_method=filter_method)
+        if generator is None:
+            generator = pipe_line_random_generators(
+                image_itself,
+                shift_image_generator(angle_offset_pre_pixel=angle_offset_pre_pixel),
+                flip_generator
+            )
         data_generator = DataGenerator(generator)
-        image, angles = next(data_generator.generate(dataset, 10000,
-                                                     record_allocation_method=record_allocation_angle_type(30, 30)))
+        angles = np.array([])
+        for index in range(batches):
+            print("batch {} / {}".format(index, batches))
+            _, _angles = next(data_generator.generate(
+                dataset, batch_size=batch_size,
+                record_allocation_method=record_allocation_angle_type(left_percentage, right_percentage)))
+            angles = np.append(angles, _angles)
+
         plt = Plot.angle_distribution(angles)
-        plt.savefig("resources/angle_distribution_generator_exclude_duplicated_small_angles_30_40_30.jpg")
+        plt.savefig("resources/{}.jpg".format(name))
