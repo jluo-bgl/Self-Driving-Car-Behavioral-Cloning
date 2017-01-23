@@ -11,7 +11,7 @@ def image_itself(feeding_data):
 def shift_image_generator(angle_offset_pre_pixel=0.003):
     def _generator(feeding_data):
         image, angle, _ = _shift_image(
-            feeding_data.image(), feeding_data.steering_angle, 80, 20, angle_offset_pre_pixel=angle_offset_pre_pixel)
+            feeding_data.image(), feeding_data.steering_angle, 100, 20, angle_offset_pre_pixel=angle_offset_pre_pixel)
         return image, angle
 
     return _generator

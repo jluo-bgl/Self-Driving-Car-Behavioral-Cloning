@@ -196,7 +196,7 @@ class DriveDataSet(object):
 
     @staticmethod
     def records_to_straight_left_right(feeding_data_list):
-        straight_angle = 0.05
+        straight_angle = 0.1
         straight = [record for record in feeding_data_list if -straight_angle <= record.steering_angle <= straight_angle]
         left = [record for record in feeding_data_list if record.steering_angle > straight_angle]
         right = [record for record in feeding_data_list if record.steering_angle < -straight_angle]
@@ -312,45 +312,3 @@ class DrivingDataLoader(object):
 
             print("generating")
             yield batch_images, batch_steering
-
-
-class DriveDataProvider(object):
-    """
-    provide data to neural network
-    """
-
-    def __init__(self, images, angles):
-        self.images = images
-        self.angles = angles
-
-    def save_to_file(self, file_name):
-        data = {
-            "images": self.images,
-            "angles": self.angles
-        }
-        with open(file_name, mode='wb') as f:
-            pickle.dump(data, f)
-
-    @staticmethod
-    def load_from_file(file_name):
-        with open(file_name, mode='rb') as f:
-            data = pickle.load(f)
-
-        return DriveDataProvider(
-            images=data["images"],
-            angles=data["angles"]
-        )
-
-    @classmethod
-    def from_other_provider(cls, data_provider):
-        return cls(data_provider.images, data_provider.angles)
-
-
-if __name__ == '__main__':
-    print("loading data")
-    data_provider = DriveDataProvider(
-        *DrivingDataLoader("datasets/udacity-sample-track-1/driving_log.csv", center_img_only=True).images_and_angles())
-    assert len(data_provider.images) > 5000
-    print("saving data")
-    data_provider.save_to_file("datasets/udacity-sample-track-1/driving.p")
-    print("done")

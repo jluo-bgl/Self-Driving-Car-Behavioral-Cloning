@@ -2,7 +2,7 @@ import unittest
 import numpy.testing
 import numpy as np
 from data_load import FeedingData, record_allocation_random, record_allocation_angle_type
-from data_load import DriveDataProvider, DrivingDataLoader, DriveDataSet, DataGenerator, \
+from data_load import DrivingDataLoader, DriveDataSet, DataGenerator, \
     drive_record_filter_exclude_small_angles, drive_record_filter_include_all, drive_record_filter_exclude_zeros
 from data_generators import image_itself, \
      shift_image_generator, random_generators, pipe_line_generators, pipe_line_random_generators, flip_generator
@@ -108,10 +108,10 @@ class TestPlot(unittest.TestCase):
             flip_generator
         )
         self._angle_distribution(
-            "angle_distribution_generator_exclude_duplicated_small_angles_45_10_45_pipe_line", 100, 256,
+            "angle_distribution_generator_exclude_duplicated_small_angles_40_20_40_pipe_line", 100, 256,
             filter_method=drive_record_filter_exclude_small_angles,
-            left_percentage=45,
-            right_percentage=45,
+            left_percentage=40,
+            right_percentage=40,
             angle_offset_pre_pixel=0.002,
             generator=generator
         )
