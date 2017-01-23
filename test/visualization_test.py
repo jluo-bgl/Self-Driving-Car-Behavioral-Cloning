@@ -34,7 +34,8 @@ class TestVideos(unittest.TestCase):
 
     def test_create_sample_data_video(self):
         Video.from_udacity_sample_data(
-            DriveDataSet("../datasets/udacity-sample-track-1/driving_log.csv"),
+            DriveDataSet("../datasets/udacity-sample-track-1/driving_log.csv", crop_images=False,
+                         filter_method=drive_record_filter_include_all),
             "resources/sample_original.mp4")
 
     def test_create_sample_data_corp_video(self):

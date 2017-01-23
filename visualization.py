@@ -33,7 +33,7 @@ class Video(object):
         frames = []
         duration_pre_image = 0.1
         total = len(dataset.drive_records)
-        for index in range(0, total, 4):
+        for index in range(0, total, 2):
             print("working {}/{}".format(index + 1, total))
             record = dataset.drive_records[index]
             image, angle = record.image(), record.steering_angle
