@@ -222,15 +222,18 @@ class DataGenerator(object):
         input_shape = data_set.output_shape()
         batch_images = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
         batch_steering = np.zeros(batch_size)
-        while 1:
+        while True:
             selected_records = record_allocation_method(
                 batch_size, data_set.records,
                 data_set.left_records, data_set.straight_records, data_set.right_records)
             i_batch = 0
             for record in selected_records:
-                x, y = self.custom_generator(record)
-                batch_images[i_batch] = x
-                batch_steering[i_batch] = y
+                while True:
+                    x, y = self.custom_generator(record)
+                    batch_images[i_batch] = x
+                    batch_steering[i_batch] = y
+                    if y < 1.:
+                        break
                 i_batch += 1
             yield batch_images, batch_steering
 
