@@ -9,6 +9,7 @@ from performance_timer import Timer
 CROP_HEIGHT = 66
 CROP_WIDTH = 200
 
+
 def full_file_name(base_folder, image_file_name):
     return base_folder + "/" + image_file_name.strip()
 
@@ -48,7 +49,7 @@ class DriveRecord(object):
     It has 3 images and steering angle at that time.
     Images will cache to memory after first read (if no one read the file, it won't fill the memory)
     """
-    def __init__(self, base_folder, csv_data_frame_row, crop_image=False):
+    def __init__(self, base_folder, csv_data_frame_row, crop_image=False, fake_image=False):
         """
 
         :param base_folder:
@@ -63,6 +64,7 @@ class DriveRecord(object):
         self.steering_angle = csv_data_frame_row[4]
 
         self.crop_image = crop_image
+        self.fake_image = fake_image
 
         self._center_image = None
         self._left_image = None
@@ -90,6 +92,8 @@ class DriveRecord(object):
         return self._right_image
 
     def read_image(self, file_name):
+        if self.fake_image:
+            return np.array([[[1, 1, 1]]])
         image = read_image_from_file(file_name)
         if self.crop_image:
             image = _crop_image(image, 66, 200)
@@ -129,14 +133,16 @@ class DriveDataSet(object):
     DriveDataSet represent multiple Records together, you can access any record by [index] or iterate through
     As it represent past, it's immutable as well
     """
-    def __init__(self, file_name, crop_images=False, filter_method=drive_record_filter_exclude_small_angles):
+    def __init__(self, file_name, crop_images=False, fake_image=False,
+                 filter_method=drive_record_filter_exclude_small_angles):
         self.base_folder = os.path.split(file_name)[0]
         # center,left,right,steering,throttle,brake,speed
         self.data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
         self.drive_records = list(map(
             lambda index: DriveRecord(self.base_folder,
                                       self.data_frame.iloc[[index]].reset_index().values[0],
-                                      crop_images),
+                                      crop_images,
+                                      fake_image=fake_image),
             range(len(self.data_frame))))
         self.records = self.drive_record_to_feeding_data(self.drive_records, filter_method)
         straight, left, right = self.records_to_straight_left_right(self.records)
@@ -176,9 +182,13 @@ class DriveDataSet(object):
                 if len(last_5_added) >= 5:
                     last_5_added.pop(0)
                 last_5_added.append(driving_record)
-                feeding_data_list.append(FeedingData(driving_record.center_image(), driving_record.steering_angle))
-                feeding_data_list.append(FeedingData(driving_record.left_image(), driving_record.steering_angle + 0.25))
-                feeding_data_list.append(FeedingData(driving_record.right_image(), driving_record.steering_angle - 0.25))
+
+                if abs(driving_record.steering_angle) <= 1.0:
+                    feeding_data_list.append(FeedingData(driving_record.center_image(), driving_record.steering_angle))
+                if abs(driving_record.steering_angle + 0.25) <= 1.0:
+                    feeding_data_list.append(FeedingData(driving_record.left_image(), driving_record.steering_angle + 0.25))
+                if abs(driving_record.steering_angle - 0.25) <= 1.0:
+                    feeding_data_list.append(FeedingData(driving_record.right_image(), driving_record.steering_angle - 0.25))
 
         # tensor = tf.map_fn(lambda image: process_stack(image), records, dtype=dtypes.uint8)
         # return tf.Session().run(tensor)
