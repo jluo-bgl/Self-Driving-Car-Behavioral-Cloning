@@ -21,7 +21,7 @@ class Trainer(object):
         model.summary()
 
         checkpointer = ModelCheckpoint(
-            filepath=final_model_name + "_current_{epoch:02d}.h5",
+            filepath=final_model_name + "_current_{epoch:02d}_loss{loss:.3f}.h5",
             save_weights_only=True,
             verbose=1
         )

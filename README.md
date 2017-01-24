@@ -70,7 +70,7 @@ data_generator = DataGenerator(center_image_generator)
 Trainer(learning_rate=0.0001, epoch=10).fit(data_generator.generate(dataset, batch_size=128))
 ```
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=mmGoI1crA9s" target="_blank">
-<img src="http://img.youtube.com/vi/mmGoI1crA9s/0.jpg" alt="Iteration 1 Self Stuck Car" width="400" height="360" border="10" /></a>
+<img src="http://img.youtube.com/vi/mmGoI1crA9s/0.jpg" alt="Iteration 1 Self Stuck Car" width="600" height="360" border="10" /></a>
 
 ###Iteration 2 Center/Left/Right Images, able to make first turn
 As i'm running into 2GB file saving issue in python, it's time to start involve in Keras generator
@@ -81,7 +81,7 @@ data_generator = DataGenerator(center_left_right_image_generator)
 Trainer(learning_rate=0.0001, epoch=10).fit(data_generator.generate(dataset, batch_size=128))
 ```
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=NlQLqaX0qqE" target="_blank">
-<img src="http://img.youtube.com/vi/NlQLqaX0qqE/0.jpg" alt="Iteration 2 First Turn Succeed" width="400" height="360" border="10" /></a>
+<img src="http://img.youtube.com/vi/NlQLqaX0qqE/0.jpg" alt="Iteration 2 First Turn Succeed" width="600" height="360" border="10" /></a>
 
 
 ###Iteration 3 Shift Image Randomly
