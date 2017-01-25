@@ -111,7 +111,7 @@ def drive_record_filter_exclude_zeros(last_added_records, current_drive_record):
         return None
 
 
-def drive_record_filter_exclude_small_angles(last_added_records, current_drive_record):
+def drive_record_filter_exclude_duplicated_small_angles(last_added_records, current_drive_record):
     """
     The filter method which drive record you want add into training samples
     :param last_added_records: last x records we just added in, this could change, you have to check the length
@@ -133,22 +133,14 @@ class DriveDataSet(object):
     DriveDataSet represent multiple Records together, you can access any record by [index] or iterate through
     As it represent past, it's immutable as well
     """
-    def __init__(self, file_name, crop_images=False, fake_image=False,
-                 filter_method=drive_record_filter_exclude_small_angles):
-        self.base_folder = os.path.split(file_name)[0]
-        # center,left,right,steering,throttle,brake,speed
-        self.data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
-        self.drive_records = list(map(
-            lambda index: DriveRecord(self.base_folder,
-                                      self.data_frame.iloc[[index]].reset_index().values[0],
-                                      crop_images,
-                                      fake_image=fake_image),
-            range(len(self.data_frame))))
-        self.records = self.drive_record_to_feeding_data(self.drive_records, filter_method)
-        straight, left, right = self.records_to_straight_left_right(self.records)
-        self.straight_records = straight
-        self.left_records = left
-        self.right_records = right
+    def __init__(self, records):
+        self.records = records
+
+    @classmethod
+    def from_csv(cls, file_name, crop_images=False, fake_image=False,
+                 filter_method=drive_record_filter_exclude_duplicated_small_angles):
+        records, _, _, _ = cls.read_from_csv(file_name, crop_images, fake_image, filter_method)
+        return cls(records)
 
     def __getitem__(self, n):
         return self.records[n]
@@ -167,13 +159,6 @@ class DriveDataSet(object):
 
     @staticmethod
     def drive_record_to_feeding_data(records, filter_method):
-        # def process_stack(image):
-        #     distorted_image = image
-        #     if crop_images:
-        #         distorted_image = tf.image.resize_image_with_crop_or_pad(image, CROP_HEIGHT, CROP_WIDTH)
-        #
-        #     return distorted_image
-
         feeding_data_list = []
         last_5_added = []
         for driving_record in records:
@@ -195,12 +180,20 @@ class DriveDataSet(object):
         return feeding_data_list
 
     @staticmethod
-    def records_to_straight_left_right(feeding_data_list):
-        straight_angle = 0.1
-        straight = [record for record in feeding_data_list if -straight_angle <= record.steering_angle <= straight_angle]
-        left = [record for record in feeding_data_list if record.steering_angle > straight_angle]
-        right = [record for record in feeding_data_list if record.steering_angle < -straight_angle]
-        return straight, left, right
+    def read_from_csv(file_name, crop_images=False, fake_image=False,
+                      filter_method=drive_record_filter_exclude_duplicated_small_angles):
+        base_folder = os.path.split(file_name)[0]
+        # center,left,right,steering,throttle,brake,speed
+        data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
+        drive_records = list(map(
+            lambda index: DriveRecord(base_folder,
+                                      data_frame.iloc[[index]].reset_index().values[0],
+                                      crop_images,
+                                      fake_image=fake_image),
+            range(len(data_frame))))
+        records = DriveDataSet.drive_record_to_feeding_data(drive_records, filter_method)
+
+        return records, drive_records, data_frame, base_folder
 
 
 def _random_access_list(data_list, size):
@@ -208,107 +201,132 @@ def _random_access_list(data_list, size):
     return [data_list[index] for index in random_ids]
 
 
-def record_allocation_random(batch_size, all_records, left_angles, center_angles, right_angles):
-    return _random_access_list(all_records, batch_size)
+class RecordAllocator(object):
+    def __init__(self, data_set):
+        self.data_set = data_set
+
+    def allocate(self, epoch, batch_number, batch_size):
+        raise NotImplementedError("Please Implement this method")
 
 
-def record_allocation_angle_type(left_percentage, right_percentage):
-    def _impl(batch_size, all_records, left_angles, center_angles, right_angles):
-        left_size = batch_size * left_percentage // 100
-        right_size = batch_size * right_percentage // 100
+class RecordRandomAllocator(RecordAllocator):
+    def allocate(self, epoch, batch_number, batch_size):
+        return _random_access_list(self.data_set.records, batch_size)
+
+
+class RecordAngleTypeAllocator(RecordAllocator):
+    def __init__(self, data_set, left_percentage, right_percentage):
+        self.left_percentage = left_percentage
+        self.right_percentage = right_percentage
+        self.data_set = data_set
+        self.center_angles = data_set.straight_records
+        self.left_angles = data_set.left_records
+        self.right_angles = data_set.right_records
+
+    def allocate(self, epoch, batch_number, batch_size):
+        left_size = batch_size * self.left_percentage // 100
+        right_size = batch_size * self.right_percentage // 100
         center_size = batch_size - left_size - right_size
 
-        return _random_access_list(center_angles, center_size) + \
-               _random_access_list(left_angles, left_size) + \
-               _random_access_list(right_angles, right_size)
-    return _impl
+        return _random_access_list(self.center_angles, center_size) + \
+               _random_access_list(self.left_angles, left_size) + \
+               _random_access_list(self.right_angles, right_size)
+
+
+class AngleTypeWithZeroRecordAllocator(RecordAllocator):
+    def __init__(self, data_set,
+                 left_percentage, right_percentage,
+                 zero_percentage, zero_left_percentage, zero_right_percentage,
+                 left_right_image_offset_angle):
+        self.left_percentage = left_percentage
+        self.right_percentage = right_percentage
+        self.zero_percentage = zero_percentage
+        self.zero_left_percentage = zero_left_percentage
+        self.zero_right_percentage = zero_right_percentage
+        self.data_set = data_set
+
+        feeding_data_list = data_set.records
+        float_margin = 0.001
+        straight_angle = 0.1
+        self.zero_angles = self._records_of_range(feeding_data_list, 0, float_margin)
+        self.zero_angles_left = self._records_of_range(feeding_data_list, -left_right_image_offset_angle, float_margin)
+        self.zero_angles_right = self._records_of_range(feeding_data_list, left_right_image_offset_angle, float_margin)
+        self.center_angles = self._straight_records(feeding_data_list, straight_angle, float_margin)
+        self.left_angles = self._left_records(
+            feeding_data_list, straight_angle, float_margin, left_right_image_offset_angle)
+        self.right_angles = self._right_records(
+            feeding_data_list, straight_angle, float_margin, left_right_image_offset_angle)
+        total_records = len(self.zero_angles) + \
+                        len(self.zero_angles_left) + len(self.zero_angles_right) + \
+                        len(self.left_angles) + len(self.right_angles) + len(self.center_angles)
+        assert len(feeding_data_list) == total_records
+
+    @staticmethod
+    def _records_of_range(records, center, offset):
+        return [record for record in records if
+                center - offset < record.steering_angle < center + offset]
+
+    @staticmethod
+    def _straight_records(records, straight_angle, zero_angle):
+        return [record for record in records if
+                zero_angle <= abs(record.steering_angle) < straight_angle]
+
+    @staticmethod
+    def _left_records(records, straight_angle, zero_angle, left_right_image_offset_angle):
+        return [record for record in records if
+                (record.steering_angle <= -left_right_image_offset_angle - zero_angle) or
+                (-left_right_image_offset_angle + zero_angle <= record.steering_angle <= -straight_angle)
+                ]
+
+    @staticmethod
+    def _right_records(records, straight_angle, zero_angle, left_right_image_offset_angle):
+        return [record for record in records if
+                (record.steering_angle >= left_right_image_offset_angle + zero_angle) or
+                (left_right_image_offset_angle - zero_angle >= record.steering_angle >= straight_angle)
+                ]
+
+    def allocate(self, epoch, batch_number, batch_size):
+        left_size = batch_size * self.left_percentage // 100
+        right_size = batch_size * self.right_percentage // 100
+        zero_size = batch_size * self.zero_percentage // 100
+        zero_left_size = batch_size * self.zero_left_percentage // 100
+        zero_right_size = batch_size * self.zero_right_percentage // 100
+        center_size = batch_size - left_size - right_size - zero_size - zero_left_size - zero_right_size
+
+        return _random_access_list(self.center_angles, center_size) + \
+               _random_access_list(self.left_angles, left_size) + \
+               _random_access_list(self.right_angles, right_size) + \
+               _random_access_list(self.zero_angles, zero_size) + \
+               _random_access_list(self.zero_angles_left, zero_left_size) + \
+               _random_access_list(self.zero_angles_right, zero_right_size)
 
 
 class DataGenerator(object):
-    def __init__(self, custom_generator):
+    def __init__(self, record_allocation_method, custom_generator):
+        assert record_allocation_method is not None
+        assert custom_generator is not None
+        self.record_allocation_method = record_allocation_method
         self.custom_generator = custom_generator
 
-    def generate(self, data_set, batch_size=32, record_allocation_method=record_allocation_random):
-        input_shape = data_set.output_shape()
-        batch_images = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
-        batch_steering = np.zeros(batch_size)
+    def generate(self, batch_size=32):
+        epoch = -1
+        batch = -1
         while True:
-            selected_records = record_allocation_method(
-                batch_size, data_set.records,
-                data_set.left_records, data_set.straight_records, data_set.right_records)
-            i_batch = 0
+            epoch += 1
+            batch += 1
+            selected_records = self.record_allocation_method(epoch, batch, batch_size)
+            input_shape = selected_records[0].image().shape
+            batch_images = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
+            batch_steering = np.zeros(batch_size)
+            i_record = 0
             for record in selected_records:
                 for retry in range(50):
                     x, y = self.custom_generator(record)
-                    batch_images[i_batch] = x
-                    batch_steering[i_batch] = y
+                    batch_images[i_record] = x
+                    batch_steering[i_record] = y
                     if abs(y) < 1.:
                         break
                     if retry > 20:
                         print("angle {} retrying {}".format(y, retry))
-                i_batch += 1
-            yield batch_images, batch_steering
-
-
-class DrivingDataLoader(object):
-    def __init__(self, file_name, center_img_only):
-        self.base_folder = os.path.split(file_name)[0]
-        # center,left,right,steering,throttle,brake,speed
-        self.data_frame = pd.read_csv(file_name, delimiter=',', encoding="utf-8-sig")
-        # images, angles = self._read_csv(center_img_only)
-        # self.images = images
-        # self.angles = angles
-
-    def _read_csv(self, center_img_only):
-        center_images, center_angles = self._read_image_angles(
-            self.data_frame.values[:, 0],
-            self.data_frame.values[:, 3]
-        )
-
-        all_images, all_angles = center_images, center_angles
-
-        if not center_img_only:
-            left_images, left_angles = self._read_image_angles(
-                self.data_frame.values[:, 1],
-                self.data_frame.values[:, 3] + 0.2
-            )
-            right_images, right_angles = self._read_image_angles(
-                self.data_frame.values[:, 2],
-                self.data_frame.values[:, 3] - 0.2
-            )
-
-            all_images = np.append(np.append(all_images, left_images, axis=0), right_images, axis=0)
-            all_angles = np.append(np.append(all_angles, left_angles, axis=0), right_angles, axis=0)
-
-        return all_images, all_angles
-
-    def _read_image_angles(self, image_files_names, angles):
-        images = map(DrivingDataLoader._read_image(self.base_folder), image_files_names)
-        return np.array(list(images)), angles
-
-    @staticmethod
-    def _read_image(base_folder):
-        def read(image_file_name):
-            return DrivingDataLoader._read_image_from_file(base_folder + "/" + image_file_name.lstrip())
-
-        return read
-
-    def _read_image_from_file(self, image_file_name):
-        return plt.imread(self.base_folder + "/" + image_file_name.strip())
-
-    def images_and_angles(self):
-        return self.images, self.angles
-
-    def generate(self, data, batch_size=32):
-        batch_images = np.zeros((batch_size, 160, 320, 3))
-        batch_steering = np.zeros(batch_size)
-        while 1:
-            for i_batch in range(batch_size):
-                i_line = np.random.randint(len(data))
-                line_data = data.iloc[[i_line]].reset_index()
-                x, y = self._read_image_from_file(line_data.values[0, 1]), line_data.values[0, 4]
-                batch_images[i_batch] = x
-                batch_steering[i_batch] = y
-
-            print("generating")
+                i_record += 1
             yield batch_images, batch_steering

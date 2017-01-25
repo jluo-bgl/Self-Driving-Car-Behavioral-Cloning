@@ -1,7 +1,7 @@
 import unittest
 import numpy.testing
 import numpy as np
-from data_load import FeedingData, DriveDataSet
+from data_load import FeedingData, DriveDataSet, FeedingData, AngleTypeWithZeroRecordAllocator
 from data_generators import _shift_image, pipe_line_generators, random_generators, flip_generator, filter_generator
 from PIL import Image
 
@@ -10,7 +10,7 @@ class TestGeneratorFuncs(unittest.TestCase):
     def test_shift_image(self):
         angle = 1
         image = np.array([[[1, 1, 1], [2, 2, 2], [3, 3, 3]]])
-        new_image, new_angle, shift_size = _shift_image(image, angle, 3, 0)
+        new_image, new_angle, shift_size = _shift_image(image, angle, 3, 0, angle_offset_pre_pixel=0.004)
         self.assertEqual(new_angle, angle + shift_size * 0.004)
         if shift_size == 1:
             numpy.testing.assert_almost_equal(new_image, [[[0, 0, 0], [1, 1, 1], [2, 2, 2]]])
@@ -56,24 +56,6 @@ class TestGeneratorFuncs(unittest.TestCase):
         np.testing.assert_almost_equal(image, [[[2, 2, 2], [1, 1, 1]]])
         self.assertEqual(-0.1, angle)
 
-    def test_flip_real_image(self):
-        dataset = DriveDataSet("resources/driving_log_mini.csv")
-        record = dataset[0]
-        center = record.center_image()
-        center_flip, center_flip_angle = flip_generator(FeedingData(center, 0.1765823))
-        left = record.left_image()
-        left_flip, left_flip_angle = flip_generator(FeedingData(left, 0.1765823 + 0.25))
-        right = record.right_image()
-        right_flip, right_flip_angle = flip_generator(FeedingData(right, 0.1765823 - 0.25))
-        Image.fromarray(center).save("resources/flip/center.jpg")
-        Image.fromarray(center_flip).save("resources/flip/center_flip.jpg")
-        Image.fromarray(left).save("resources/flip/left.jpg")
-        Image.fromarray(left_flip).save("resources/flip/left_flip.jpg")
-        Image.fromarray(right).save("resources/flip/right.jpg")
-        Image.fromarray(right_flip).save("resources/flip/right_flip.jpg")
-        self.assertEqual(left_flip_angle, -(0.1765823 + 0.25))
-        self.assertEqual(right_flip_angle, -(0.1765823 - 0.25))
-
     def test_filter(self):
         def generator1(feeding_data):
             return feeding_data.image(), 0.01
@@ -88,3 +70,52 @@ class TestGeneratorFuncs(unittest.TestCase):
         np.testing.assert_almost_equal(image, [[[1, 1, 1]]])
         self.assertEqual(angle, 1, "should always pickup generator2 as it pass the threshold")
 
+
+def any_number():
+    return 1
+
+
+def angles(feeding_data_list):
+    return [item.steering_angle for item in feeding_data_list]
+
+
+class TestRecordAllocation(unittest.TestCase):
+    def test_record_allocation_angle_type_with_zeros(self):
+        data_set = DriveDataSet([
+            FeedingData(None, 0.0),
+            FeedingData(None, 0.1),
+            FeedingData(None, -0.1),
+            FeedingData(None, 0.25),
+            FeedingData(None, -0.25)
+        ])
+
+        allocator = AngleTypeWithZeroRecordAllocator(data_set,
+                                                     any_number(), any_number(), any_number(),
+                                                     any_number(), any_number(), 0.25)
+
+        self.assertEqual(angles(allocator.zero_angles), [0.0])
+        self.assertEqual(angles(allocator.zero_angles_left), [-0.25])
+        self.assertEqual(angles(allocator.zero_angles_right), [0.25])
+        self.assertEqual(angles(allocator.center_angles), [])
+        self.assertEqual(angles(allocator.left_angles), [-0.1])
+        self.assertEqual(angles(allocator.right_angles), [0.1])
+
+    def test_record_allocation_angle_type_with_zeros_in_range(self):
+        data_set = DriveDataSet([
+            FeedingData(None, 0.03),
+            FeedingData(None, -0.03),
+            FeedingData(None, 0.15),
+            FeedingData(None, -0.15),
+            FeedingData(None, 0.26),
+            FeedingData(None, -0.26)
+        ])
+        allocator = AngleTypeWithZeroRecordAllocator(data_set,
+                                                     any_number(), any_number(), any_number(),
+                                                     any_number(), any_number(), 0.25)
+
+        self.assertEqual(angles(allocator.zero_angles), [])
+        self.assertEqual(angles(allocator.zero_angles_left), [])
+        self.assertEqual(angles(allocator.zero_angles_right), [])
+        self.assertEqual(angles(allocator.center_angles), [0.03, -0.03])
+        self.assertEqual(angles(allocator.left_angles), [-0.15, -0.26])
+        self.assertEqual(angles(allocator.right_angles), [0.15, 0.26])

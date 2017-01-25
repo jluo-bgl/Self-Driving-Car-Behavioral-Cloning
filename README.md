@@ -1,10 +1,25 @@
 #Learn human driving behavior based on deep neural network
 This is [UDacity](https://www.udacity.com/drive) Self Driving Car Behavioral Cloning Project
 
-This repository arms to help me pass the project and helps you who is learning deep learning to
+Lots of blog / repositories in internet just show you their final result, but how did they reach their beautiful 
+final result is really the most important part for a learner point of view.
+
+This repository arms to help me as a newbie and helps you who is learning deep learning to
 1. Easy to experiment, from simply apply CNN model to very complex data augment
-2. Visualise what's going on
-3. Build more understanding about how deep learning works
+2, Reproducible, every bad result we keep it reproducible so that we know we made a mistake buy what reason
+3. Visualise what's going on
+4. Build more understanding about how deep learning works
+
+To help achieve above goal, all code base has been formed by below layers or structure
+| Layer             | Purpose                                                           |
+| ------------------|-------------------------------------------------------------------|
+| DriveDataSet      | Represent the data you recorded                                   |
+| RecordAllocator   | Before pass recorded data to data augment, which set of data you'd like to allocated  |
+| generators        | after got original data, what data augment process you'd like to apply to  |
+| DataGenerator     | It's a helper class to read data set from RecordAllocator, pass into generator, get result and feed into Keras generator  |
+| Model             | the  Network  |
+| Trainer           | create Model, read data from DataGenerator, do the real training  |
+
 
 ###Before Start
 ####Existing Solutions
