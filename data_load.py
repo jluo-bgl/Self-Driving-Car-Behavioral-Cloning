@@ -9,6 +9,8 @@ from performance_timer import Timer
 CROP_HEIGHT = 66
 CROP_WIDTH = 200
 
+MAX_ANGLE = 1.5
+
 
 def full_file_name(base_folder, image_file_name):
     return base_folder + "/" + image_file_name.strip()
@@ -168,11 +170,11 @@ class DriveDataSet(object):
                     last_5_added.pop(0)
                 last_5_added.append(driving_record)
 
-                if abs(driving_record.steering_angle) <= 1.0:
+                if abs(driving_record.steering_angle) <= MAX_ANGLE:
                     feeding_data_list.append(FeedingData(driving_record.center_image(), driving_record.steering_angle))
-                if abs(driving_record.steering_angle + 0.25) <= 1.0:
+                if abs(driving_record.steering_angle + 0.25) <= MAX_ANGLE:
                     feeding_data_list.append(FeedingData(driving_record.left_image(), driving_record.steering_angle + 0.25))
-                if abs(driving_record.steering_angle - 0.25) <= 1.0:
+                if abs(driving_record.steering_angle - 0.25) <= MAX_ANGLE:
                     feeding_data_list.append(FeedingData(driving_record.right_image(), driving_record.steering_angle - 0.25))
 
         # tensor = tf.map_fn(lambda image: process_stack(image), records, dtype=dtypes.uint8)
@@ -324,7 +326,7 @@ class DataGenerator(object):
                     x, y = self.custom_generator(record)
                     batch_images[i_record] = x
                     batch_steering[i_record] = y
-                    if abs(y) < 1.:
+                    if abs(y) < MAX_ANGLE:
                         break
                     if retry > 20:
                         print("angle {} retrying {}".format(y, retry))

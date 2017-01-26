@@ -118,7 +118,7 @@ def _shift_image(image, steer, left_right_shift_range, top_bottom_shift_range, a
     top_bottom_shift_size = round(top_bottom_shift_range * np.random.uniform(-0.5, 0.5))
     if shift_size >= image.shape[1]:
         image_tr = image
-        print("WARNING Image is smaller then shift size, original image returned")
+        # print("WARNING Image is smaller then shift size, original image returned")
     else:
         image_tr = scipy.ndimage.interpolation.shift(image, (top_bottom_shift_size, shift_size, 0))
     return image_tr, steer_ang, shift_size
