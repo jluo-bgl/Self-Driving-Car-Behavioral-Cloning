@@ -5,9 +5,8 @@ from keras.optimizers import Adam
 
 class Trainer(object):
     def __init__(
-            self, model, learning_rate, epoch, dropout=0.5,
+            self, learning_rate, epoch, dropout=0.5,
             custom_name="", multi_process=False, number_of_worker=4):
-        self.model = model
         self.learning_rate = learning_rate
         self.epoch = epoch
         self.multi_process = multi_process

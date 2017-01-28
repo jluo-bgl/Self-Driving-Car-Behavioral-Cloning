@@ -3,7 +3,6 @@ from data_load import DriveDataSet, DataGenerator, drive_record_filter_include_a
 from data_generators import image_itself, brightness_image_generator, shadow_generator, \
     shift_image_generator, random_generators, pipe_line_generators, pipe_line_random_generators, flip_generator
 from trainer import Trainer
-from model import nvidia
 
 data_set = DriveDataSet.from_csv("datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
                                  filter_method=drive_record_filter_include_all)
@@ -28,7 +27,7 @@ generator = pipe_line_generators(
     shadow_generator
 )
 data_generator = DataGenerator(allocator.allocate, generator)
-Trainer(learning_rate=0.0001, epoch=60, dropout=0.5, multi_process=True,
+Trainer(learning_rate=0.0001, epoch=45, dropout=0.5, multi_process=True,
         custom_name="bigger_angle_shift_0.002_bright_0.35_angles_35_30_35").fit(
     data_generator.generate(batch_size=256),
     input_shape=data_set.output_shape()
