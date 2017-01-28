@@ -28,7 +28,7 @@ generator = pipe_line_generators(
     shadow_generator
 )
 data_generator = DataGenerator(allocator.allocate, generator)
-Trainer(learning_rate=0.0001, epoch=45, dropout=0.5, multi_process=True,
+Trainer(learning_rate=0.0001, epoch=60, dropout=0.5, multi_process=True,
         custom_name="bigger_angle_shift_0.002_bright_0.35_angles_35_30_35").fit(
     data_generator.generate(batch_size=256),
     input_shape=data_set.output_shape()
