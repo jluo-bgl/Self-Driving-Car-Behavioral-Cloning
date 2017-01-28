@@ -206,15 +206,10 @@ def _random_access_list(data_list, size):
     return [data_list[index] for index in random_ids]
 
 
-class RecordAllocator(object):
+class RecordRandomAllocator(object):
     def __init__(self, data_set):
         self.data_set = data_set
 
-    def allocate(self, epoch, batch_number, batch_size):
-        raise NotImplementedError("Please Implement this method")
-
-
-class RecordRandomAllocator(RecordAllocator):
     def allocate(self, epoch, batch_number, batch_size):
         return _random_access_list(self.data_set.records, batch_size)
 

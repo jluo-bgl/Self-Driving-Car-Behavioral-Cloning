@@ -5,8 +5,9 @@ from keras.optimizers import Adam
 
 class Trainer(object):
     def __init__(
-            self, learning_rate, epoch, dropout=0.5,
+            self, model, learning_rate, epoch,
             custom_name="", multi_process=False, number_of_worker=4):
+        self.model = model
         self.learning_rate = learning_rate
         self.epoch = epoch
         self.multi_process = multi_process
@@ -14,12 +15,9 @@ class Trainer(object):
         self.dropout = dropout
         self.model_name = "model_{}_lr{}_epoch{}_dropout{}".format(custom_name, learning_rate, epoch, dropout)
 
-    def generate_model(self, input_shape, dropout):
-        return nvidia(input_shape, dropout)
-
-    def fit(self, generator, input_shape):
-        final_model_name = self.model_name + "_{}x{}x{}".format(*input_shape)
-        model = self.generate_model(input_shape, self.dropout)
+    def fit_generator(self, generator):
+        final_model_name = self.model_name
+        model = self.model
         model.summary()
 
         checkpointer = ModelCheckpoint(
