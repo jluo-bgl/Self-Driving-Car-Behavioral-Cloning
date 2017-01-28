@@ -214,7 +214,7 @@ class RecordRandomAllocator(object):
         return _random_access_list(self.data_set.records, batch_size)
 
 
-class RecordAngleTypeAllocator(RecordAllocator):
+class RecordAngleTypeAllocator(object):
     def __init__(self, data_set, left_percentage, right_percentage):
         self.left_percentage = left_percentage
         self.right_percentage = right_percentage
@@ -233,7 +233,7 @@ class RecordAngleTypeAllocator(RecordAllocator):
                _random_access_list(self.right_angles, right_size)
 
 
-class AngleTypeWithZeroRecordAllocator(RecordAllocator):
+class AngleTypeWithZeroRecordAllocator(object):
     def __init__(self, data_set,
                  left_percentage, right_percentage,
                  zero_percentage, zero_left_percentage, zero_right_percentage,
