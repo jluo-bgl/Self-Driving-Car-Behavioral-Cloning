@@ -3,8 +3,9 @@ from data_generators import image_itself, brightness_image_generator, \
     shift_image_generator, random_generators, pipe_line_generators, pipe_line_random_generators, flip_generator
 from trainer import Trainer
 
-data_set = DriveDataSet.from_csv("datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
-                                 filter_method=drive_record_filter_include_all)
+data_set = DriveDataSet.from_csv(
+    "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
+    filter_method=drive_record_filter_include_all)
 
 allocator = AngleTypeWithZeroRecordAllocator(
     data_set, left_percentage=20, right_percentage=20,

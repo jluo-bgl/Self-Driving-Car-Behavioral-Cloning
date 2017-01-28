@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from performance_timer import Timer
+from functools import reduce
 
 CROP_HEIGHT = 66
 CROP_WIDTH = 200
 
-MAX_ANGLE = 1.5
+MAX_ANGLE = 1
 
 
 def full_file_name(base_folder, image_file_name):
@@ -199,6 +200,8 @@ class DriveDataSet(object):
 
 
 def _random_access_list(data_list, size):
+    if len(data_list) == 0:
+        return []
     random_ids = np.random.randint(0, len(data_list), size)
     return [data_list[index] for index in random_ids]
 
@@ -250,6 +253,7 @@ class AngleTypeWithZeroRecordAllocator(RecordAllocator):
         feeding_data_list = data_set.records
         float_margin = 0.001
         straight_angle = 0.1
+
         self.zero_angles = self._records_of_range(feeding_data_list, 0, float_margin)
         self.zero_angles_left = self._records_of_range(feeding_data_list, -left_right_image_offset_angle, float_margin)
         self.zero_angles_right = self._records_of_range(feeding_data_list, left_right_image_offset_angle, float_margin)
@@ -301,6 +305,95 @@ class AngleTypeWithZeroRecordAllocator(RecordAllocator):
                _random_access_list(self.zero_angles, zero_size) + \
                _random_access_list(self.zero_angles_left, zero_left_size) + \
                _random_access_list(self.zero_angles_right, zero_right_size)
+
+
+class AngleSegment(object):
+    def __init__(self, start_end_point_tuple, percentage):
+        """
+        :param start_end_point_tuple: start inclusive, end exclusive
+        :param percentage:
+        """
+        self.start_end_point = start_end_point_tuple
+        self.percentage = percentage
+
+    def in_range(self, angle):
+        return self.start_end_point[0] <= angle < self.start_end_point[1]
+
+    def __str__(self):
+        return "({},{})".format(self.start_end_point, self.percentage)
+
+
+class AngleSegmentRecordAllocator(object):
+    def __init__(self, data_set, *segments):
+        self.data_set = data_set
+        self.segments = segments
+        self._check_should_100_percent()
+
+        feeding_data_list = data_set.records
+        self.segment_records = {}
+        for segment in segments:
+            self.segment_records[segment] = self._records_from_segment(feeding_data_list, segment)
+
+        total_records = reduce(lambda count, x: count + len(x[1]), self.segment_records.items(), 0)
+        assert len(feeding_data_list) >= total_records, \
+            "all records {} should equals to allocated records {}".format(len(feeding_data_list), total_records)
+
+    @classmethod
+    def sharp_zero_slow_zero_allocator(cls, data_set):
+        return cls(
+            data_set,
+            AngleSegment((-1.0, -0.25), 10),   # sharp left
+            AngleSegment((-0.25, -0.249), 10),  # sharp turn left (zero right camera)
+            AngleSegment((-0.249, -0.1), 10),  # big turn left
+            AngleSegment((-0.1, 0), 15),       # straight left
+            AngleSegment((0, 0.001), 10),      # straight zero center camera
+            AngleSegment((0.001, 0.1), 15),    # straight right
+            AngleSegment((0.1, 0.25), 10),     # big turn right
+            AngleSegment((0.25, 0.251), 10),   # sharp turn right (zero left camera)
+            AngleSegment((0.251, 1.001), 10)   # sharp right
+        )
+
+    def _check_should_100_percent(self):
+        total = reduce(lambda count, segment: count + segment.percentage, self.segments, 0)
+        assert total == 100, "percentage of all segments should have 100%, but got {} ".format(total)
+
+    @staticmethod
+    def _records_from_segment(records, segment):
+        return [record for record in records if segment.in_range(record.steering_angle)]
+
+    def allocate(self, epoch, batch_number, batch_size):
+        records = []
+        for index, segment in enumerate(self.segments):
+            if index == len(self.segments) - 1:
+                count = batch_size - len(records)
+            else:
+                count = round(batch_size * segment.percentage / 100)
+            records += _random_access_list(self.segment_records[segment], count)
+
+        return records
+
+    def allocated_records_count(self, records, angle):
+        """
+        records which meet the segment in given angle
+        :param records: any FeedingData Record
+        :param angle: the angle
+        :return: the Segment and list of FeedingData
+        """
+        segment_records = []
+        target_segment = None
+        for segment in self.segments:
+            if segment.in_range(angle):
+                target_segment = segment
+                break
+
+        if target_segment is None:
+            raise LookupError("angle not in range")
+
+        for record in records:
+            if target_segment.in_range(record.steering_angle):
+                segment_records.append(record)
+
+        return target_segment, segment_records
 
 
 class DataGenerator(object):

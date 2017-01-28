@@ -10,16 +10,38 @@ This repository arms to help me as a newbie and helps you who is learning deep l
 3. Visualise what's going on
 4. Build more understanding about how deep learning works
 
-To help achieve above goal, all code base has been formed by below layers or structure
-| Layer             | Purpose                                                           |
-| ------------------|-------------------------------------------------------------------|
-| DriveDataSet      | Represent the data you recorded                                   |
-| RecordAllocator   | Before pass recorded data to data augment, which set of data you'd like to allocated  |
-| generators        | after got original data, what data augment process you'd like to apply to  |
-| DataGenerator     | It's a helper class to read data set from RecordAllocator, pass into generator, get result and feed into Keras generator  |
-| Model             | the  Network  |
-| Trainer           | create Model, read data from DataGenerator, do the real training  |
+To help achieve above goal, all code base has been formed by below layers or pipes
+| Layer             | Purpose                                                                                           |
+| ------------------|---------------------------------------------------------------------------------------------------|
+| DriveDataSet      | Represent the data you recorded                                                                   |
+|   filter_method   | What data you'd like to added in                                                                  |
+| RecordAllocator   | Before pass recorded data to data augment, percentage of different data you'd like to added in    |
+| generators        | Data augment process you'd like to apply to, easy to extend to any order                          |
+| DataGenerator     | Read from RecordAllocator, pass to generator, then feed data into Keras generator                 |
+| Model             | the  Network                                                                                      |
+| Trainer           | create Model, read data from DataGenerator, do the real training                                  |
 
+When we put everything together, the code looks like:
+```python
+data_set = DriveDataSet.from_csv(
+    "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
+    filter_method=drive_record_filter_include_all)
+
+allocator = AngleTypeWithZeroRecordAllocator(
+    data_set, left_percentage=20, right_percentage=20,
+    zero_percentage=8, zero_left_percentage=6, zero_right_percentage=6,
+    left_right_image_offset_angle=0.25)
+generator = pipe_line_generators(
+    shift_image_generator(angle_offset_pre_pixel=0.002),
+    flip_generator,
+    brightness_image_generator(0.25)
+)
+data_generator = DataGenerator(allocator.allocate, generator)
+Trainer(learning_rate=0.0001, epoch=10, dropout=0.5).fit(
+    data_generator.generate(batch_size=128),
+    input_shape=data_set.output_shape()
+)
+```
 
 ###Before Start
 ####Existing Solutions
