@@ -10,7 +10,7 @@ from functools import reduce
 CROP_HEIGHT = 66
 CROP_WIDTH = 200
 
-MAX_ANGLE = 1
+MAX_ANGLE = 1.5
 
 
 def full_file_name(base_folder, image_file_name):
