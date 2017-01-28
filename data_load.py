@@ -140,9 +140,9 @@ class DriveDataSet(object):
         self.records = records
 
     @classmethod
-    def from_csv(cls, file_name, crop_images=False, fake_image=False,
+    def from_csv(cls, file_name, crop_images=False, fake_image=False, all_cameras_images=True,
                  filter_method=drive_record_filter_exclude_duplicated_small_angles):
-        records, _, _, _ = cls.read_from_csv(file_name, crop_images, fake_image, filter_method)
+        records, _, _, _ = cls.read_from_csv(file_name, crop_images, fake_image, all_cameras_images, filter_method)
         return cls(records)
 
     def __getitem__(self, n):
@@ -161,7 +161,7 @@ class DriveDataSet(object):
         return self.records[0].image().shape
 
     @staticmethod
-    def drive_record_to_feeding_data(records, filter_method):
+    def drive_record_to_feeding_data(records, filter_method, all_cameras_images):
         feeding_data_list = []
         last_5_added = []
         for driving_record in records:
@@ -173,17 +173,18 @@ class DriveDataSet(object):
 
                 if abs(driving_record.steering_angle) <= MAX_ANGLE:
                     feeding_data_list.append(FeedingData(driving_record.center_image(), driving_record.steering_angle))
-                if abs(driving_record.steering_angle + 0.25) <= MAX_ANGLE:
-                    feeding_data_list.append(FeedingData(driving_record.left_image(), driving_record.steering_angle + 0.25))
-                if abs(driving_record.steering_angle - 0.25) <= MAX_ANGLE:
-                    feeding_data_list.append(FeedingData(driving_record.right_image(), driving_record.steering_angle - 0.25))
+                if all_cameras_images:
+                    if abs(driving_record.steering_angle + 0.25) <= MAX_ANGLE:
+                        feeding_data_list.append(FeedingData(driving_record.left_image(), driving_record.steering_angle + 0.25))
+                    if abs(driving_record.steering_angle - 0.25) <= MAX_ANGLE:
+                        feeding_data_list.append(FeedingData(driving_record.right_image(), driving_record.steering_angle - 0.25))
 
         # tensor = tf.map_fn(lambda image: process_stack(image), records, dtype=dtypes.uint8)
         # return tf.Session().run(tensor)
         return feeding_data_list
 
     @staticmethod
-    def read_from_csv(file_name, crop_images=False, fake_image=False,
+    def read_from_csv(file_name, crop_images=False, fake_image=False, all_cameras_images=True,
                       filter_method=drive_record_filter_exclude_duplicated_small_angles):
         base_folder = os.path.split(file_name)[0]
         # center,left,right,steering,throttle,brake,speed
@@ -194,7 +195,7 @@ class DriveDataSet(object):
                                       crop_images,
                                       fake_image=fake_image),
             range(len(data_frame))))
-        records = DriveDataSet.drive_record_to_feeding_data(drive_records, filter_method)
+        records = DriveDataSet.drive_record_to_feeding_data(drive_records, filter_method, all_cameras_images)
 
         return records, drive_records, data_frame, base_folder
 

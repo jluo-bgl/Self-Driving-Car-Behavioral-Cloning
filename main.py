@@ -19,16 +19,16 @@ def is_osx():
 use_multi_process = not is_osx()
 
 
-def simple_raw_data():
+def raw_data_centre_image_only():
     data_set = DriveDataSet.from_csv(
-        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=False,
         filter_method=drive_record_filter_include_all)
 
     allocator = RecordRandomAllocator(data_set)
     generator = image_itself
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=simple_raw_data.__name__).fit_generator(
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -85,4 +85,4 @@ def segment():
     )
 
 
-simple_raw_data()
+raw_data_centre_image_only()

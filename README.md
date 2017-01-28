@@ -19,7 +19,7 @@ To help achieve above goal, all code base has been formed by below layers or pip
 | RecordAllocator   | Before pass recorded data to data augment, percentage of different data you'd like to added in    |
 | generators        | Data augment process you'd like to apply to, easy to extend to any order                          |
 | DataGenerator     | Read from RecordAllocator, pass to generator, then feed data into Keras generator                 |
-| Model             | the  Network                                                                                      |
+| model             | the Network                                                                                      |
 | Trainer           | create Model, read data from DataGenerator, do the real training                                  |
 
 
