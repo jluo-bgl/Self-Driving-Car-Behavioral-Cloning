@@ -12,8 +12,7 @@ class Trainer(object):
         self.epoch = epoch
         self.multi_process = multi_process
         self.number_of_worker = number_of_worker
-        self.dropout = dropout
-        self.model_name = "model_{}_lr{}_epoch{}_dropout{}".format(custom_name, learning_rate, epoch, dropout)
+        self.model_name = "model_{}_lr{}_epoch{}".format(custom_name, learning_rate, epoch)
 
     def fit_generator(self, generator):
         final_model_name = self.model_name
