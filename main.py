@@ -21,7 +21,7 @@ use_multi_process = not is_osx()
 
 def raw_data_centre_image_only():
     data_set = DriveDataSet.from_csv(
-        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=False,
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=False,
         filter_method=drive_record_filter_include_all)
 
     allocator = RecordRandomAllocator(data_set)
