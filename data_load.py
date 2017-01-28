@@ -342,15 +342,17 @@ class AngleSegmentRecordAllocator(object):
     def sharp_zero_slow_zero_allocator(cls, data_set):
         return cls(
             data_set,
-            AngleSegment((-1.0, -0.25), 10),   # sharp left
-            AngleSegment((-0.25, -0.249), 10),  # sharp turn left (zero right camera)
+            AngleSegment((-1.5, -0.5), 10),  # big sharp left
+            AngleSegment((-0.5, -0.25), 14),  # sharp left
+            AngleSegment((-0.25, -0.249), 3),  # sharp turn left (zero right camera)
             AngleSegment((-0.249, -0.1), 10),  # big turn left
-            AngleSegment((-0.1, 0), 15),       # straight left
-            AngleSegment((0, 0.001), 10),      # straight zero center camera
-            AngleSegment((0.001, 0.1), 15),    # straight right
-            AngleSegment((0.1, 0.25), 10),     # big turn right
-            AngleSegment((0.25, 0.251), 10),   # sharp turn right (zero left camera)
-            AngleSegment((0.251, 1.001), 10)   # sharp right
+            AngleSegment((-0.1, 0), 11),  # straight left
+            AngleSegment((0, 0.001), 4),  # straight zero center camera
+            AngleSegment((0.001, 0.1), 11),  # straight right
+            AngleSegment((0.1, 0.25), 10),  # big turn right
+            AngleSegment((0.25, 0.251), 3),  # sharp turn right (zero left camera)
+            AngleSegment((0.251, 0.5), 14),  # sharp right
+            AngleSegment((0.5, 1.5), 10)  # big sharp right
         )
 
     def _check_should_100_percent(self):

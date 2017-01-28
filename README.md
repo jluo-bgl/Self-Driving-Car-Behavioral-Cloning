@@ -11,6 +11,7 @@ This repository arms to help me as a newbie and helps you who is learning deep l
 4. Build more understanding about how deep learning works
 
 To help achieve above goal, all code base has been formed by below layers or pipes
+
 | Layer             | Purpose                                                                                           |
 | ------------------|---------------------------------------------------------------------------------------------------|
 | DriveDataSet      | Represent the data you recorded                                                                   |
@@ -20,6 +21,7 @@ To help achieve above goal, all code base has been formed by below layers or pip
 | DataGenerator     | Read from RecordAllocator, pass to generator, then feed data into Keras generator                 |
 | Model             | the  Network                                                                                      |
 | Trainer           | create Model, read data from DataGenerator, do the real training                                  |
+
 
 When we put everything together, the code looks like:
 ```python
