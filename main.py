@@ -147,7 +147,8 @@ def segment_left_centre_right():
     generator = pipe_line_generators(
         shift_image_generator(angle_offset_pre_pixel=0.002),
         flip_generator,
-        brightness_image_generator(0.25)
+        brightness_image_generator(0.25),
+        shadow_generator
     )
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)

@@ -206,6 +206,7 @@ epoch to 10 seconds! the trainable parames reduced from **32,213,367** to **1,59
 and the result is amazing, we are able to pass until next right turn
 
 The cropped version of sample data video:
+
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=pxG46j9kK0I" target="_blank">
 <img src="http://img.youtube.com/vi/pxG46j9kK0I/0.jpg" alt="UDacity Sample Data Cropped Version" width="320" height="200" border="10" /></a>
 
@@ -299,7 +300,24 @@ Youtube Full Version
 <img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
 
 ##Iteration 7, Shift, Flip, Brightness and Shadown
-Track 2 had a much darker road
+Track 2 had a much darker road, also shadows from montain, in this iteration we add 
+brightness and shadow randomly to images.
+
+Below code will take 1 image from training set, apply shift, flip, brightness and shadown
+create 20 images and save it as gif.
+```python
+    dataset = DriveDataSet.from_csv("datasets/udacity-sample-track-1/driving_log.csv")
+
+    generator = pipe_line_generators(
+        shift_image_generator(angle_offset_pre_pixel=0.002),
+        flip_generator,
+        brightness_image_generator(0.25),
+        shadow_generator
+    )
+    Video.from_generators("test/resources/generator_pipe_line.gif", dataset[60], 20, generator)
+```
+![generator_pipe_line](images/generator_pipe_line.gif "generator_pipe_line")
+
 ```python
 def raw_data_centre_left_right_crop_shift_flip():
     data_set = DriveDataSet.from_csv(
@@ -318,7 +336,7 @@ def raw_data_centre_left_right_crop_shift_flip():
         data_generator.generate(batch_size=128)
     )
 ```
-**160seconds** per epoch, final loss **0.035**, total trainable params: **1,595,511**, the weights file has 6.4mb
+**180seconds** per epoch, final loss **0.035**, total trainable params: **1,595,511**, the weights file has 6.4mb
 
 ![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
 
@@ -341,3 +359,9 @@ As you can see, angle 0 (going straight) has far more samples, as we used left a
 is same.
 what it happened in real world of our steering angle distributed? I guess maybe it's 25% of left and right turn, 50% 
 of straight.
+
+
+
+#TODOs
+There are lot more waiting to explorer. the model has been totally been left out, only 
+nvidia has been tested in this repo, feel free to fork this repo and experience more.
