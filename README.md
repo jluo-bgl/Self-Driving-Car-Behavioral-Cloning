@@ -410,6 +410,20 @@ _angle_distribution(
 ```
 ![angle_distribution_segment_11](images/angle_distribution_segment_11.png)
 
+after this process, we got confidence that right / left turn, straight are got 
+better chance to feed into model.
+the result are very promise, we are able to run in both tracks and all turns are smooth
+
+Track 1 (The training track)
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=aIbBFLhGVUU" target="_blank">
+<img src="http://img.youtube.com/vi/aIbBFLhGVUU/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
+
+Track 2 (The track model never see)
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=BhEuwRFVVQA" target="_blank">
+<img src="http://img.youtube.com/vi/BhEuwRFVVQA/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
+
+
 
 #TODOs
 There are lot more waiting to explorer. the model has been totally been left out, only 

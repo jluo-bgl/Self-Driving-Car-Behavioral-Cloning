@@ -157,7 +157,7 @@ def segment_left_centre_right():
     )
 
 
-def segment_std_distribution_shift_flip_brightness_shadow():
+def segment_normal_distribution_shift_flip_brightness_shadow():
     data_set = DriveDataSet.from_csv(
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
         filter_method=drive_record_filter_include_all)
@@ -186,7 +186,7 @@ def segment_std_distribution_shift_flip_brightness_shadow():
     data_generator = DataGenerator(allocator.allocate, augment)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
     Trainer(model, learning_rate=0.0001, epoch=45, multi_process=use_multi_process,
-            custom_name="bigger_angle_shift_0.002_bright_0.35_angles_35_30_35").fit_generator(
+            custom_name=segment_normal_distribution_shift_flip_brightness_shadow.__name__).fit_generator(
         data_generator.generate(batch_size=256)
     )
 
@@ -197,4 +197,5 @@ def segment_std_distribution_shift_flip_brightness_shadow():
 # raw_data_centre_left_right_image_crop()
 # raw_data_centre_left_right_crop_shift()
 # raw_data_centre_left_right_crop_shift_flip()
-raw_data_centre_left_right_crop_shift_flip_brightness_shadow()
+# raw_data_centre_left_right_crop_shift_flip_brightness_shadow()
+segment_normal_distribution_shift_flip_brightness_shadow()
