@@ -3,10 +3,25 @@
 ##### Table of Contents  
 1. [Overview](#Overview)
 2. [Existing Solutions](#Existing_Solutions)
-⋅⋅* [Nvidia](#nvidia)
-⋅⋅* [Commaai](#commaai)
+2.1 [Nvidia](#nvidia)
+2.2 [Commaai](#commaai)
+3. [Data Collection](#data_collection)
+
+4. [Iterations](#iterations)
+4.1 [Iteration 1, Centre Image Only, no dropout](#centre_image_no_dropout)
+4.2 [Iteration 2 Centre Image Only with 0.5 dropout](#centre_image_dropout_5)
+4.3 [Iteration 3 Center/Left/Right Images](#centre_left_right_images)
+4.4 [Iteration 3 Center/Left/Right Images With Crop](#centre_left_right_images_crop)
+4.5 [Iteration 5 Shift Image Randomly](#centre_left_right_images_crop_shift)
+4.6 [Iteration 6 Shift and Flip](#centre_left_right_images_crop_shift_flip)
+4.7 [Iteration 7 Shift, Flip, Brightness and Shadown](#centre_left_right_images_crop_shift_flip_brightness_shadown)
+4.8 [Iteration 8 Feeding data distribution](#data_distribution)
+
+5. [Todos](#todos)
+
 
 <a name="Overview"/>
+
 #Overview
 This is [UDacity](https://www.udacity.com/drive) Self Driving Car Behavioral Cloning Project
 
@@ -92,8 +107,10 @@ def segment_std_distribution_shift_flip_brightness_shadow():
 ```
 
 <a name="Existing_Solutions"/>
+
 #Existing Solutions
 <a name="nvidia"/>
+
 ###NVIDIA
 Nvidia has published a nice paper [End to End Learning for Self-Driving Cars](https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf).
 This video will makes you very exciting.
@@ -103,12 +120,14 @@ This video will makes you very exciting.
 alt="NVIDIA AI Car Demonstration" width="400" height="360" border="10" /></a>
 
 <a name="commaai"/>
+
 ###Commaai
 [The Paper](https://arxiv.org/abs/1608.01230)
 [Github Repository](https://github.com/commaai/research)
 [train_steering_model.py](https://github.com/commaai/research/blob/master/train_steering_model.py)
 
 <a name="data_collection"/>
+
 #Data Collection
 1. [UDacity](https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip) 
 provided a simulator and produced a sample data for track 1 that you can use.
@@ -123,9 +142,12 @@ UDacity Sample data
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=LLCXS-uCMSw" target="_blank">
 <img src="http://img.youtube.com/vi/LLCXS-uCMSw/0.jpg" alt="UDacity Sample Data" width="320" height="360" border="10" /></a>
 
+<a name="iterations"/>
 
 #Iterations
-##Iteration 1 Centre Image Only, no dropout
+<a name="centre_image_no_dropout"/>
+
+##Iteration 1, Centre Image Only, no dropout
 ```python
 def raw_data_centre_image_only():
     # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
@@ -153,6 +175,7 @@ car gose wild and running into water before bridge
 ![centre_camera_nvidia_no_dropout](images/results/centre_camera_nvidia_no_dropout.gif "centre_camera_nvidia_no_dropout")
 
 
+<a name="centre_image_dropout_5"/>
 
 ##Iteration 2 Centre Image Only with 0.5 dropout
 dropout created much better result, with everything remands same, it able to drive
@@ -174,6 +197,7 @@ def raw_data_centre_image_dropout_5():
 **50seconds** per epoch, final loss **0.012**, total trainable params: **32,213,367**, the weights file has 128mb
 ![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
 
+<a name="centre_left_right_images"/>
 
 ##Iteration 3 Center/Left/Right Images
 It fails on road which don't have a clear edge. what if we add left and right camera 
@@ -197,6 +221,8 @@ def raw_data_centre_left_right_image():
 ```
 **50seconds** per epoch, final loss **0.024**, total trainable params: **32,213,367**, the weights file has 128mb
 ![center_left_right](images/results/center_left_right.gif "center_left_right")
+
+<a name="centre_left_right_images_crop"/>
 
 ##Iteration 4 Center/Left/Right with Crop
 By remove the informat we know won't effecting steering angle, for example sky, we 
@@ -226,6 +252,8 @@ def raw_data_centre_left_right_image_crop():
 ```
 **10seconds** per epoch, final loss **0.033**, total trainable params: **1,595,511**, the weights file has 6.4mb
 ![centre_left_right_crop](images/results/centre_left_right_crop.gif "centre_left_right_crop")
+
+<a name="centre_left_right_images_crop_shift"/>
 
 ##Iteration 5 Shift Image Randomly
 so far we have made use of all provided data, and our car able to drive half of the lap,
@@ -265,6 +293,7 @@ We are able to run whole lap without crush, great achievement!!
 ![raw_data_centre_left_right_crop_shift](images/results/raw_data_centre_left_right_crop_shift.gif "raw_data_centre_left_right_crop_shift")
 ![raw_data_centre_left_right_crop_shift track 2](images/results/raw_data_centre_left_right_crop_shift track 2.gif "raw_data_centre_left_right_crop_shift track 2")
 
+<a name="centre_left_right_images_crop_shift_flip"/>
 
 ##Iteration 6, Shift and Flip
 In last iteration, our car able to run in track 1, but fail in track 2, also wheels 
@@ -298,6 +327,8 @@ Youtube Full Version
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=FWNCuCbronw" target="_blank">
 <img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
+
+<a name="centre_left_right_images_crop_shift_flip_brightness_shadown"/>
 
 ##Iteration 7, Shift, Flip, Brightness and Shadown
 Track 2 had a much darker road, also shadows from montain, in this iteration we add 
@@ -345,9 +376,9 @@ Youtube Full Version
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=FWNCuCbronw" target="_blank">
 <img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
 
+<a name="data_distribution"/>
 
-
-###Iteration 9 Feeding data distribution
+###Iteration 8 Feeding data distribution
 We are still not able to make sharper turns, 
 it looks we running out of option? one way is go back to simulator and generate more data,
 also we know the model should work, the issue must be in the data, either not enough or we baies the model too much,
@@ -420,10 +451,11 @@ Track 1 (The training track)
 <img src="http://img.youtube.com/vi/aIbBFLhGVUU/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
 
 Track 2 (The track model never see)
+
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=BhEuwRFVVQA" target="_blank">
 <img src="http://img.youtube.com/vi/BhEuwRFVVQA/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
 
-
+<a name="todos"/>
 
 #TODOs
 There are lot more waiting to explorer. the model has been totally been left out, only 
