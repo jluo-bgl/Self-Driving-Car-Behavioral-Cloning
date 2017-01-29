@@ -174,4 +174,5 @@ def segment_std_distribution_shift_flip_brightness_shadow():
 # raw_data_centre_image_dropout_5()
 # raw_data_centre_left_right_image()
 # raw_data_centre_left_right_image_crop()
-raw_data_centre_left_right_crop_shift()
+# raw_data_centre_left_right_crop_shift()
+raw_data_centre_left_right_crop_shift_flip()
