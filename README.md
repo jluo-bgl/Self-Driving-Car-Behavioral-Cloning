@@ -116,11 +116,11 @@ and shared his own [dataset](https://drive.google.com/file/d/0B-KJCaaF7ellQUkzdk
 UDacity Sample data
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=LLCXS-uCMSw" target="_blank">
-<img src="http://img.youtube.com/vi/LLCXS-uCMSw/0.jpg" alt="UDacity Sample Data" width="600" height="360" border="10" /></a>
+<img src="http://img.youtube.com/vi/LLCXS-uCMSw/0.jpg" alt="UDacity Sample Data" width="320" height="360" border="10" /></a>
 
 
 #Iterations
-###Iteration 1 Centre Image Only, no dropout
+##Iteration 1 Centre Image Only, no dropout
 ```python
 def raw_data_centre_image_only():
     # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
@@ -142,12 +142,14 @@ def raw_data_centre_image_only():
     )
 ```
 **50seconds** per epoch, final loss **0.004**, total trainable params: **32,213,367**, the weights file has 128mb
+
 car gose wild and running into water before bridge
+
 ![centre_camera_nvidia_no_dropout](images/results/centre_camera_nvidia_no_dropout.gif "centre_camera_nvidia_no_dropout")
 
 
 
-###Iteration 2 Centre Image Only with 0.5 dropout
+##Iteration 2 Centre Image Only with 0.5 dropout
 dropout created much better result, with everything remands same, it able to drive
 much more smooth and able to pass bridge, from now on we will always has 0.5 dropout
 ```python
@@ -168,10 +170,12 @@ def raw_data_centre_image_dropout_5():
 ![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
 
 
-###Iteration 3 Center/Left/Right Images
-it fails on road which don't have a clear edge. what if we add left and right camera 
+##Iteration 3 Center/Left/Right Images
+It fails on road which don't have a clear edge. what if we add left and right camera 
 images in? as they are more point towards to road edge, we are expecting model will
 gain better knowledge about road edge.
+
+Compare to iteration 2, our car at least trying to make a little turn before run out.
 ```python
 def raw_data_centre_left_right_image():
     # all_cameras_images=True was the only difference
@@ -198,7 +202,7 @@ and the result is amazing, we are able to pass until next right turn
 
 The cropped version of sample data video:
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=pxG46j9kK0I" target="_blank">
-<img src="http://img.youtube.com/vi/pxG46j9kK0I/0.jpg" alt="UDacity Sample Data Cropped Version" width="600" height="360" border="10" /></a>
+<img src="http://img.youtube.com/vi/pxG46j9kK0I/0.jpg" alt="UDacity Sample Data Cropped Version" width="320" height="200" border="10" /></a>
 
 ```python
 def raw_data_centre_left_right_image_crop():
