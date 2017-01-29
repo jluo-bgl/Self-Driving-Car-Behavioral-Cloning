@@ -20,14 +20,20 @@ use_multi_process = not is_osx()
 
 
 def raw_data_centre_image_only():
+    # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
     data_set = DriveDataSet.from_csv(
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=False,
         filter_method=drive_record_filter_include_all)
-
+    # What the data distribution will be, below example just randomly return data from data set, so that the
+    # distribution will be same with what original data set have
     allocator = RecordRandomAllocator(data_set)
-    generator = image_itself
-    data_generator = DataGenerator(allocator.allocate, generator)
+    # what's the data augment pipe line have, this have no pipe line, just the image itself
+    augment = image_itself
+    # connect allocator and augment together
+    data_generator = DataGenerator(allocator.allocate, augment)
+    # create the model
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    # put everthing together, start a real Keras training process with fit_generator
     Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )

@@ -23,26 +23,31 @@ To help achieve above goal, all code base has been formed by below layers or pip
 | Trainer           | create Model, read data from DataGenerator, do the real training                                  |
 
 
-When we put everything together, the code looks like:
+When we put everything together, the simple form of code looks like:
 ```python
-data_set = DriveDataSet.from_csv(
-    "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
-    filter_method=drive_record_filter_include_all)
+def raw_data_centre_image_only():
+    # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=False,
+        filter_method=drive_record_filter_include_all)
+    # What the data distribution will be, below example just randomly return data from data set, so that the
+    # distribution will be same with what original data set have
+    allocator = RecordRandomAllocator(data_set)
+    # what's the data augment pipe line have, this have no pipe line, just the image itself
+    augment = image_itself
+    # connect allocator and augment together
+    data_generator = DataGenerator(allocator.allocate, augment)
+    # create the model
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    # put everthing together, start a real Keras training process with fit_generator
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
+raw_data_centre_image_only()
+```
 
-allocator = AngleTypeWithZeroRecordAllocator(
-    data_set, left_percentage=20, right_percentage=20,
-    zero_percentage=8, zero_left_percentage=6, zero_right_percentage=6,
-    left_right_image_offset_angle=0.25)
-generator = pipe_line_generators(
-    shift_image_generator(angle_offset_pre_pixel=0.002),
-    flip_generator,
-    brightness_image_generator(0.25)
-)
-data_generator = DataGenerator(allocator.allocate, generator)
-Trainer(learning_rate=0.0001, epoch=10, dropout=0.5).fit(
-    data_generator.generate(batch_size=128),
-    input_shape=data_set.output_shape()
-)
+```python
+
 ```
 
 ###Before Start
@@ -96,18 +101,32 @@ The whole system has been designed for easy to
 ##Model
 
 #Iterations
-###Iteration 1 Self Stuck Car
-1. Center Images
-2. No Augmention
-3. Nvidia Model with one dropout
-4. 5 Apoch, Adam 0.001 learning rate
-5. 55% validation accuracy
-To reproduce this iteration, run below code
+###Iteration 1 Centre Image Only
 ```python
-dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv")
-data_generator = DataGenerator(center_image_generator)
-Trainer(learning_rate=0.0001, epoch=10).fit(data_generator.generate(dataset, batch_size=128))
+def raw_data_centre_image_only():
+    # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=False,
+        filter_method=drive_record_filter_include_all)
+    # What the data distribution will be, below example just randomly return data from data set, so that the
+    # distribution will be same with what original data set have
+    allocator = RecordRandomAllocator(data_set)
+    # what's the data augment pipe line have, this have no pipe line, just the image itself
+    augment = image_itself
+    # connect allocator and augment together
+    data_generator = DataGenerator(allocator.allocate, augment)
+    # create the model
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    # put everthing together, start a real Keras training process with fit_generator
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
 ```
+**50seconds** per epoch, total trainable params: **32,213,367**, the weights file has 128mb
+
+
+
+
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=mmGoI1crA9s" target="_blank">
 <img src="http://img.youtube.com/vi/mmGoI1crA9s/0.jpg" alt="Iteration 1 Self Stuck Car" width="600" height="360" border="10" /></a>
 
