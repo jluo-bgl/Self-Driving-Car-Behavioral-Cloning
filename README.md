@@ -147,7 +147,7 @@ def raw_data_centre_left_right_image():
     )
 ```
 **50seconds** per epoch, final loss **0.024**, total trainable params: **32,213,367**, the weights file has 128mb
-![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
+![center_left_right](images/results/center_left_right.gif "center_left_right")
 
 
 
