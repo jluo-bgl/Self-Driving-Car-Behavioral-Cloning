@@ -198,7 +198,7 @@ def raw_data_centre_left_right_image():
 **50seconds** per epoch, final loss **0.024**, total trainable params: **32,213,367**, the weights file has 128mb
 ![center_left_right](images/results/center_left_right.gif "center_left_right")
 
-###Iteration 4 Center/Left/Right with Crop
+##Iteration 4 Center/Left/Right with Crop
 By remove the informat we know won't effecting steering angle, for example sky, we 
 can make our model more focuse to the things that matters.
 by reduce image size from 160x320 to 66x200, we reduced the training time from 50 seconds 
@@ -226,16 +226,16 @@ def raw_data_centre_left_right_image_crop():
 **10seconds** per epoch, final loss **0.033**, total trainable params: **1,595,511**, the weights file has 6.4mb
 ![centre_left_right_crop](images/results/centre_left_right_crop.gif "centre_left_right_crop")
 
-
-
-###Iteration 5 Shift Image Randomly
+##Iteration 5 Shift Image Randomly
 so far we have made use of all provided data, and our car able to drive half of the lap,
 it seems that we need some how create more data so that our car knows how to make a good
 right turn.
 Other idea is that shift the images and adjust angles accordingly.
 for example, center image with angle 0, move 10 pixels left would result angle 0.02
 
-![shift_center_images](images/results/shift_center_images.gif "shift_center_images")
+![shift_center_images](images/shift_center_images.gif "shift_center_images")
+![shift_left_images](images/shift_left_images.gif "shift_left_images")
+![shift_right_images](images/shift_right_images.gif "shift_right_images")
 
 As we introduced random generator here, every batch our model will see different image so that we can't cache,
 the crop we did and enable multi_process is a life saver (espicially we will do more augment later),
@@ -259,38 +259,8 @@ def raw_data_centre_left_right_crop_shift():
         data_generator.generate(batch_size=128)
     )
 ```
-
-###Iteration 4, Crop to 66x200
-To improve the performance, we start to support crop, images will reduced from 160x320 to 66x200
-this modification change the whole framework to support different input data shape, this include
-1. drive.py support any input shape
-2. Trainer will ask DriveDataSet for input shape and pass into model
-
->The crop and multi_process reduced training time from 10 minutes to 1.5 minutes
->please note, the whole system still support full image to been trained, just added one more parameter
-while contruct DriveDataSet(crop_images=True)
-
-also trainable params dropped from **32,213,367** to **1,595,511**,
-the weight file size dropped from **128m** to **6.4m**,
-it's a huge train time save.
-
-In this iteration, we are able to drive until bridge, occasionally it's able to drive whole lap.
-
-```python
-dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv", crop_images=True)
-data_generator = DataGenerator(
-    random_generators(
-        random_center_left_right_image_generator,
-        pipe_line_generators(
-            random_center_left_right_image_generator,
-            shift_image_generator
-        )
-    ))
-Trainer(learning_rate=0.0001, epoch=10, multi_process=True).fit(
-    data_generator.generate(dataset, batch_size=128),
-    input_shape=dataset.output_shape()
-)
-```
+**160seconds** per epoch, final loss **0.036**, total trainable params: **1,595,511**, the weights file has 6.4mb
+![raw_data_centre_left_right_crop_shift](images/results/raw_data_centre_left_right_crop_shift.gif "raw_data_centre_left_right_crop_shift")
 
 
 ###Iteration 5, remove shift from left and right camera images
