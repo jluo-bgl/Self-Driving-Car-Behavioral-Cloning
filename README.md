@@ -122,7 +122,8 @@ def raw_data_centre_image_only():
         data_generator.generate(batch_size=128)
     )
 ```
-**50seconds** per epoch, total trainable params: **32,213,367**, the weights file has 128mb
+**50seconds** per epoch, final loss 0.001, total trainable params: **32,213,367**, the weights file has 128mb
+![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
 
 
 
