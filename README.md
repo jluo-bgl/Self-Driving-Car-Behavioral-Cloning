@@ -28,7 +28,8 @@ This is [UDacity](https://www.udacity.com/drive) Self Driving Car Behavioral Clo
 Lots of blog / repositories in internet just show you their final result, but how did they reach their beautiful 
 final result is really the most important part for a learner point of view.
 
-This repository arms to help me as a newbie and helps you who is learning deep learning to
+This repository arms to help me as a newbie and helps you who is learning deep learning
+
 1. Easy to experiment, from simply apply CNN model to very complex data augment
 2, Reproducible, every bad result we keep it reproducible so that we know we made a mistake buy what reason
 3. Visualise what's going on
@@ -76,7 +77,7 @@ def segment_std_distribution_shift_flip_brightness_shadow():
     data_set = DriveDataSet.from_csv(
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
         filter_method=drive_record_filter_include_all)
-    # fine tune every part of training data so that make it meat std distrubtion
+    # fine tune every part of training data so that make it meat normal distribution
     allocator = AngleSegmentRecordAllocator(
         data_set,
         AngleSegment((-1.5, -0.5), 10),  # big sharp left
