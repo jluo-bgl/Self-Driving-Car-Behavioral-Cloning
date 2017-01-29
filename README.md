@@ -43,7 +43,7 @@ final result is really the most important part for a learner point of view.
 This repository arms to help me as a newbie and helps you who is learning deep learning
 
 1. Easy to experiment, from simply apply CNN model to very complex data augment
-2, Reproducible, every bad result we keep it reproducible so that we know we made a mistake buy what reason
+2. Reproducible, every bad result we keep it reproducible so that we know we made a mistake buy what reason
 3. Visualise what's going on
 4. Build more understanding about how deep learning works
 
