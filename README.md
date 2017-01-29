@@ -348,13 +348,16 @@ Youtube Full Version
 
 
 ###Iteration 9 Feeding data distribution
-It looks we running out of option for augment our data, one way is go back to simulator and generate more data,
+We are still not able to make sharper turns, 
+it looks we running out of option? one way is go back to simulator and generate more data,
 also we know the model should work, the issue must be in the data, either not enough or we baies the model too much,
 in track 1, car is turning left far more than right, maybe that's why our car not able to handle the turning right 
-very well.
-let's look back and see what kind of data we feed into model.
+
+Let's look back and see what kind of data we feed into model.
 The Udacity Sample data has below distribution
-<image>
+
+![angle_distribution_original](images/angle_distribution_original.png)
+
 As you can see, angle 0 (going straight) has far more samples, as we used left and right camera data, 0.25 and -0.25
 is same.
 what it happened in real world of our steering angle distributed? I guess maybe it's 25% of left and right turn, 50% 
