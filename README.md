@@ -292,15 +292,14 @@ def raw_data_centre_left_right_crop_shift_flip():
 **160seconds** per epoch, final loss **0.035**, total trainable params: **1,595,511**, the weights file has 6.4mb
 
 ![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
+
+Youtube Full Version
+
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=FWNCuCbronw" target="_blank">
 <img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
 
 ##Iteration 7, Shift, Flip, Brightness and Shadown
-In last iteration, our car able to run in track 1, but fail in track 2, also wheels 
-has cross the degoue zoom, which is conside as not safe.
-
-Flip is a way to generate image by a mirror-reversal of an original across a horizontal axis.
-
+Track 2 had a much darker road
 ```python
 def raw_data_centre_left_right_crop_shift_flip():
     data_set = DriveDataSet.from_csv(
@@ -323,7 +322,7 @@ def raw_data_centre_left_right_crop_shift_flip():
 
 ![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
 
-Youtue Full Version
+Youtube Full Version
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=FWNCuCbronw" target="_blank">
 <img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>

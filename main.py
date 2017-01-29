@@ -115,6 +115,26 @@ def raw_data_centre_left_right_crop_shift_flip():
     )
 
 
+def raw_data_centre_left_right_crop_shift_flip_brightness_shadow():
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    allocator = RecordRandomAllocator(data_set)
+    # shift_image_generator was the only difference
+    generator = pipe_line_generators(
+        shift_image_generator(angle_offset_pre_pixel=0.002),
+        flip_generator,
+        brightness_image_generator(0.35),
+        shadow_generator
+    )
+    data_generator = DataGenerator(allocator.allocate, generator)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
+            custom_name=raw_data_centre_left_right_crop_shift_flip_brightness_shadow.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
+
+
 def segment_left_centre_right():
     data_set = DriveDataSet.from_csv(
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
@@ -175,4 +195,5 @@ def segment_std_distribution_shift_flip_brightness_shadow():
 # raw_data_centre_left_right_image()
 # raw_data_centre_left_right_image_crop()
 # raw_data_centre_left_right_crop_shift()
-raw_data_centre_left_right_crop_shift_flip()
+# raw_data_centre_left_right_crop_shift_flip()
+raw_data_centre_left_right_crop_shift_flip_brightness_shadow()
