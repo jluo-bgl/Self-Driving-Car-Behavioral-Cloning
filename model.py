@@ -3,6 +3,7 @@ tf.python.control_flow_ops = tf
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten, Lambda, ELU
 from keras.layers import Convolution2D, MaxPooling2D
+from keras.regularizers import l2
 
 from keras import backend as K
 K.set_image_dim_ordering('tf')
