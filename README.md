@@ -122,7 +122,33 @@ def raw_data_centre_image_only():
         data_generator.generate(batch_size=128)
     )
 ```
-**50seconds** per epoch, final loss 0.001, total trainable params: **32,213,367**, the weights file has 128mb
+**50seconds** per epoch, final loss **0.004**, total trainable params: **32,213,367**, the weights file has 128mb
+![centre_camera_nvidia_no_dropout](images/results/centre_camera_nvidia_no_dropout.gif "centre_camera_nvidia_no_dropout")
+
+
+
+###Iteration 1 Centre Image Only
+```python
+def raw_data_centre_image_only():
+    # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=False,
+        filter_method=drive_record_filter_include_all)
+    # What the data distribution will be, below example just randomly return data from data set, so that the
+    # distribution will be same with what original data set have
+    allocator = RecordRandomAllocator(data_set)
+    # what's the data augment pipe line have, this have no pipe line, just the image itself
+    augment = image_itself
+    # connect allocator and augment together
+    data_generator = DataGenerator(allocator.allocate, augment)
+    # create the model
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    # put everthing together, start a real Keras training process with fit_generator
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
+```
+**50seconds** per epoch, final loss **0.012**, total trainable params: **32,213,367**, the weights file has 128mb
 ![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
 
 
