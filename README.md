@@ -370,6 +370,45 @@ is same.
 what it happened in real world of our steering angle distributed? I guess maybe it's 25% of left and right turn, 50% 
 of straight.
 
+Develop a system that able to control data distribution would benefit our experiment, 
+A record allocator called AngleSegmentRecordAllocator is here to serve this purpose.
+
+AngleSegmentRecordAllocator request multiple AngleSegment objects which define the start 
+end point of angles as well as how many percentage this segment will allocate into training set.
+
+Based on the original distribution, we'd like to create 11 segment to change the final
+training set into a normal distribution
+
+below code will generator 25,600 samples and plot the angle distribution
+```python
+data_set = create_real_dataset(filter_method=drive_record_filter_include_all)
+allocator = AngleSegmentRecordAllocator(
+    data_set,
+    AngleSegment((-1.5, -0.5), 10),    # big sharp left
+    AngleSegment((-0.5, -0.25), 14),   # sharp left
+    AngleSegment((-0.25, -0.249), 3),  # sharp turn left (zero right camera)
+    AngleSegment((-0.249, -0.1), 10),  # big turn left
+    AngleSegment((-0.1, 0), 11),       # straight left
+    AngleSegment((0, 0.001), 4),      # straight zero center camera
+    AngleSegment((0.001, 0.1), 11),    # straight right
+    AngleSegment((0.1, 0.25), 10),     # big turn right
+    AngleSegment((0.25, 0.251), 3),   # sharp turn right (zero left camera)
+    AngleSegment((0.251, 0.5), 14),   # sharp right
+    AngleSegment((0.5, 1.5), 10)     # big sharp right
+)
+generator = pipe_line_generators(
+    shift_image_generator(angle_offset_pre_pixel=0.002),
+    flip_generator,
+    brightness_image_generator(0.25)
+)
+_angle_distribution(
+    "angle_distribution_generator_exclude_duplicated_small_angles_40_20_40_pipe_line", 100, 256,
+    allocator=allocator.allocate,
+    angle_offset_pre_pixel=0.002,
+    generator=generator
+)
+```
+![angle_distribution_segment_11](images/angle_distribution_segment_11.png)
 
 
 #TODOs
