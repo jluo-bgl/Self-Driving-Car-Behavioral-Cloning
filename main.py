@@ -54,6 +54,7 @@ def raw_data_centre_image_dropout_5():
 
 
 def raw_data_centre_left_right_image():
+    # all_cameras_images=True was the only difference
     data_set = DriveDataSet.from_csv(
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=True,
         filter_method=drive_record_filter_include_all)
@@ -65,6 +66,19 @@ def raw_data_centre_left_right_image():
         data_generator.generate(batch_size=128)
     )
 
+
+def raw_data_centre_left_right_image_crop():
+    # all_cameras_images=True was the only difference
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    allocator = RecordRandomAllocator(data_set)
+    generator = image_itself
+    data_generator = DataGenerator(allocator.allocate, generator)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_left_right_image.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
 
 def segment_left_centre_right():
     data_set = DriveDataSet.from_csv(
@@ -120,5 +134,5 @@ def segment():
 
 # raw_data_centre_image_no_dropout()
 # raw_data_centre_image_dropout_5()
-raw_data_centre_left_right_image()
-
+# raw_data_centre_left_right_image()
+raw_data_centre_left_right_image_crop()

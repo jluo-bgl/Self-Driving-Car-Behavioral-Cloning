@@ -74,34 +74,13 @@ provided a simulator and produced a sample data for track 1 that you can use.
 had a [TensorFlow implementation](https://github.com/SullyChen/Autopilot-TensorFlow) 
 and shared his own [dataset](https://drive.google.com/file/d/0B-KJCaaF7ellQUkzdkpsQkloenM/view?usp=sharing)
 
-###Data Pre-processing
-####Data Input Size
-Nvidia: 3@66x200
-Commaai: 3@160x320
-Udacity: 3@160x320
+UDacity Sample data
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=LLCXS-uCMSw" target="_blank">
+<img src="http://img.youtube.com/vi/LLCXS-uCMSw/0.jpg" alt="UDacity Sample Data" width="600" height="360" border="10" /></a>
 
-### Training
-
-### Testing
-
-####Simulator
-```bash
-python drive.py model.json
-```
-this script will read model.json and model.h5, and play UDacity in Autonomous Mode
-
-#Architecture
-The whole system has been designed for easy to 
-1. Experiment
-2. Understand
-3. Extend
-
-##Data
-
-##Model
 
 #Iterations
-###Iteration 1 Centre Image Only
+###Iteration 1 Centre Image Only, no dropout
 ```python
 def raw_data_centre_image_only():
     # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
@@ -116,35 +95,32 @@ def raw_data_centre_image_only():
     # connect allocator and augment together
     data_generator = DataGenerator(allocator.allocate, augment)
     # create the model
-    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.0)
     # put everthing together, start a real Keras training process with fit_generator
     Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
 ```
 **50seconds** per epoch, final loss **0.004**, total trainable params: **32,213,367**, the weights file has 128mb
+car gose wild and running into water before bridge
 ![centre_camera_nvidia_no_dropout](images/results/centre_camera_nvidia_no_dropout.gif "centre_camera_nvidia_no_dropout")
 
 
 
-###Iteration 1 Centre Image Only
+###Iteration 2 Centre Image Only with 0.5 dropout
+dropout created much better result, with everything remands same, it able to drive
+much more smooth and able to pass bridge, from now on we will always has 0.5 dropout
 ```python
-def raw_data_centre_image_only():
-    # Create DriveDataSet from csv file, you can specify crop image, using all cameras and which data will included in
+def raw_data_centre_image_dropout_5():
     data_set = DriveDataSet.from_csv(
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=False,
         filter_method=drive_record_filter_include_all)
-    # What the data distribution will be, below example just randomly return data from data set, so that the
-    # distribution will be same with what original data set have
     allocator = RecordRandomAllocator(data_set)
-    # what's the data augment pipe line have, this have no pipe line, just the image itself
     augment = image_itself
-    # connect allocator and augment together
     data_generator = DataGenerator(allocator.allocate, augment)
-    # create the model
+    # dropout=0.5 was the only difference
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    # put everthing together, start a real Keras training process with fit_generator
-    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_dropout_5.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
 ```
@@ -152,21 +128,27 @@ def raw_data_centre_image_only():
 ![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
 
 
-
-
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=mmGoI1crA9s" target="_blank">
-<img src="http://img.youtube.com/vi/mmGoI1crA9s/0.jpg" alt="Iteration 1 Self Stuck Car" width="600" height="360" border="10" /></a>
-
-###Iteration 2 Center/Left/Right Images, able to make first turn
-As i'm running into 2GB file saving issue in python, it's time to start involve in Keras generator
-so that I don't need create a super large file and load it into memory
+###Iteration 3 Center/Left/Right Images
+it fails on road which don't have a clear edge. what if we add left and right camera 
+images in? as they are more point towards to road edge, we are expecting model will
+gain better knowledge about road edge.
 ```python
-dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv")
-data_generator = DataGenerator(center_left_right_image_generator)
-Trainer(learning_rate=0.0001, epoch=10).fit(data_generator.generate(dataset, batch_size=128))
+def raw_data_centre_left_right_image():
+    # all_cameras_images=True was the only difference
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=False, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    allocator = RecordRandomAllocator(data_set)
+    generator = image_itself
+    data_generator = DataGenerator(allocator.allocate, generator)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_left_right_image.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
 ```
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=NlQLqaX0qqE" target="_blank">
-<img src="http://img.youtube.com/vi/NlQLqaX0qqE/0.jpg" alt="Iteration 2 First Turn Succeed" width="600" height="360" border="10" /></a>
+**50seconds** per epoch, final loss **0.024**, total trainable params: **32,213,367**, the weights file has 128mb
+![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
+
 
 
 ###Iteration 3 Shift Image Randomly
