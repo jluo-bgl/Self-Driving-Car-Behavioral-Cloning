@@ -261,6 +261,7 @@ def raw_data_centre_left_right_crop_shift():
 ```
 **160seconds** per epoch, final loss **0.036**, total trainable params: **1,595,511**, the weights file has 6.4mb
 ![raw_data_centre_left_right_crop_shift](images/results/raw_data_centre_left_right_crop_shift.gif "raw_data_centre_left_right_crop_shift")
+![raw_data_centre_left_right_crop_shift track 2](images/results/raw_data_centre_left_right_crop_shift track 2.gif "raw_data_centre_left_right_crop_shift track 2")
 
 
 ###Iteration 5, remove shift from left and right camera images
