@@ -129,7 +129,7 @@ def raw_data_centre_left_right_crop_shift_flip_brightness_shadow():
     )
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
+    Trainer(model, learning_rate=0.0001, epoch=30, multi_process=use_multi_process,
             custom_name=raw_data_centre_left_right_crop_shift_flip_brightness_shadow.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
