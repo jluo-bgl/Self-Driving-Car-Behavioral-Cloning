@@ -126,7 +126,6 @@ def segment_std_distribution_shift_flip_brightness_shadow():
 
 ###NVIDIA
 Nvidia has published a nice paper [End to End Learning for Self-Driving Cars](https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf).
-This video will makes you very exciting.
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=-96BEoXJMs0
 " target="_blank"><img src="http://img.youtube.com/vi/-96BEoXJMs0/0.jpg" 
@@ -135,9 +134,9 @@ alt="NVIDIA AI Car Demonstration" width="400" height="360" border="10" /></a>
 <a name="commaai"/>
 
 ###Commaai
-[The Paper](https://arxiv.org/abs/1608.01230)
-[Github Repository](https://github.com/commaai/research)
-[train_steering_model.py](https://github.com/commaai/research/blob/master/train_steering_model.py)
+1. [The Paper](https://arxiv.org/abs/1608.01230)
+2. [Github Repository](https://github.com/commaai/research)
+3. [train_steering_model.py](https://github.com/commaai/research/blob/master/train_steering_model.py)
 
 <a name="data_collection"/>
 
@@ -467,6 +466,18 @@ Track 2 (The track model never see)
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=BhEuwRFVVQA" target="_blank">
 <img src="http://img.youtube.com/vi/BhEuwRFVVQA/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
+
+<a name="other_thinking"/>
+
+#Other Experientment
+
+<a name="remove_zero_angles_or_not"/>
+
+## Remove Zero Angles or Remove Duplicated Small Angles
+I saw lots of blog says if put too many zero angles to model, model will learn the zero bias.
+my experientment shows that instead remove lots of data, it's better to add more 
+data to make it normal distributed. (remove zero angle data will reduce the training sample to half)
+
 
 <a name="todos"/>
 
