@@ -1,23 +1,35 @@
 #Learn human driving behavior based on deep neural network
 
 ##### Table of Contents  
-1. [Overview](#Overview)
-2. [Existing Solutions](#Existing_Solutions)
-2.1 [Nvidia](#nvidia)
-2.2 [Commaai](#commaai)
-3. [Data Collection](#data_collection)
+1.. [Overview](#Overview)
 
-4. [Iterations](#iterations)
+2.. [Existing Solutions](#Existing_Solutions)
+
+2.1 [Nvidia](#nvidia)
+
+2.2 [Commaai](#commaai)
+
+3.. [Data Collection](#data_collection)
+
+4.. [Iterations](#iterations)
+
 4.1 [Iteration 1, Centre Image Only, no dropout](#centre_image_no_dropout)
+
 4.2 [Iteration 2 Centre Image Only with 0.5 dropout](#centre_image_dropout_5)
+
 4.3 [Iteration 3 Center/Left/Right Images](#centre_left_right_images)
+
 4.4 [Iteration 3 Center/Left/Right Images With Crop](#centre_left_right_images_crop)
+
 4.5 [Iteration 5 Shift Image Randomly](#centre_left_right_images_crop_shift)
+
 4.6 [Iteration 6 Shift and Flip](#centre_left_right_images_crop_shift_flip)
+
 4.7 [Iteration 7 Shift, Flip, Brightness and Shadown](#centre_left_right_images_crop_shift_flip_brightness_shadown)
+
 4.8 [Iteration 8 Feeding data distribution](#data_distribution)
 
-5. [Todos](#todos)
+5.. [Todos](#todos)
 
 
 <a name="Overview"/>
