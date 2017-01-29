@@ -149,6 +149,34 @@ def raw_data_centre_left_right_image():
 **50seconds** per epoch, final loss **0.024**, total trainable params: **32,213,367**, the weights file has 128mb
 ![center_left_right](images/results/center_left_right.gif "center_left_right")
 
+###Iteration 4 Center/Left/Right with Crop
+By remove the informat we know won't effecting steering angle, for example sky, we 
+can make our model more focuse to the things that matters.
+by reduce image size from 160x320 to 66x200, we reduced the training time from 50 seconds 
+epoch to 10 seconds! the trainable parames reduced from **32,213,367** to **1,595,511**
+and the result is amazing, we are able to pass until next right turn
+
+The cropped version of sample data video:
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=pxG46j9kK0I" target="_blank">
+<img src="http://img.youtube.com/vi/pxG46j9kK0I/0.jpg" alt="UDacity Sample Data Cropped Version" width="600" height="360" border="10" /></a>
+
+```python
+def raw_data_centre_left_right_image_crop():
+    # crop_images=True was the only difference
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    allocator = RecordRandomAllocator(data_set)
+    generator = image_itself
+    data_generator = DataGenerator(allocator.allocate, generator)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_left_right_image_crop.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
+```
+**10seconds** per epoch, final loss **0.033**, total trainable params: **1,595,511**, the weights file has 6.4mb
+![centre_left_right_crop](images/results/centre_left_right_crop.gif "centre_left_right_crop")
+
 
 
 ###Iteration 3 Shift Image Randomly

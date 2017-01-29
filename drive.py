@@ -27,8 +27,8 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 
-target_height = 160
-target_width = 320
+target_height = 66
+target_width = 200
 
 
 @sio.on('telemetry')
