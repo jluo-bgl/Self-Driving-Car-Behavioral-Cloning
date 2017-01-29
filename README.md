@@ -271,54 +271,63 @@ has cross the degoue zoom, which is conside as not safe.
 
 Flip is a way to generate image by a mirror-reversal of an original across a horizontal axis.
 
-
 ```python
-def raw_data_centre_left_right_crop_shift():
+def raw_data_centre_left_right_crop_shift_flip():
     data_set = DriveDataSet.from_csv(
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
         filter_method=drive_record_filter_include_all)
     allocator = RecordRandomAllocator(data_set)
-    # shift_image_generator added in
-    generator = shift_image_generator(angle_offset_pre_pixel=0.002)
+    # shift_image_generator was the only difference
+    generator = pipe_line_generators(
+        shift_image_generator(angle_offset_pre_pixel=0.002),
+        flip_generator
+    )
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    # have to enable multi_process as image generator becomes to bottle neck
     Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
-            custom_name=raw_data_centre_left_right_crop_shift.__name__).fit_generator(
+            custom_name=raw_data_centre_left_right_crop_shift_flip.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
 ```
-**160seconds** per epoch, final loss **0.036**, total trainable params: **1,595,511**, the weights file has 6.4mb
+**160seconds** per epoch, final loss **0.035**, total trainable params: **1,595,511**, the weights file has 6.4mb
 
 ![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=FWNCuCbronw" target="_blank">
 <img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
 
+##Iteration 7, Shift, Flip, Brightness and Shadown
+In last iteration, our car able to run in track 1, but fail in track 2, also wheels 
+has cross the degoue zoom, which is conside as not safe.
 
-###Iteration 6 Flip Image
+Flip is a way to generate image by a mirror-reversal of an original across a horizontal axis.
+
 ```python
-data_generator = DataGenerator(
-    random_generators(
-        random_center_left_right_image_generator,
-        pipe_line_generators(
-            center_image_generator,
-            shift_image_generator
-        ),
-        pipe_line_generators(
-            random_center_left_right_image_generator,
-            flip_generator
-        )
-    ))
+def raw_data_centre_left_right_crop_shift_flip():
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    allocator = RecordRandomAllocator(data_set)
+    # shift_image_generator was the only difference
+    generator = pipe_line_generators(
+        shift_image_generator(angle_offset_pre_pixel=0.002),
+        flip_generator
+    )
+    data_generator = DataGenerator(allocator.allocate, generator)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
+            custom_name=raw_data_centre_left_right_crop_shift_flip.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
 ```
+**160seconds** per epoch, final loss **0.035**, total trainable params: **1,595,511**, the weights file has 6.4mb
 
-###Iteration 7 The dropout to rescue
-0.5 Droput in every lay improved the performance much better
+![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
 
+Youtue Full Version
 
-###Iteration 8 Convert generator to batch model and convert into Tensorflow 
-after add flip image, it took 2 minutes for every epoch, which is still too long for me.
-most of the time, my GPU is waiting for image to been generated. 
-convert the augment into tensorflow to do it in batch, gpu and true multiple thread
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=FWNCuCbronw" target="_blank">
+<img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
+
 
 
 ###Iteration 9 Feeding data distribution
