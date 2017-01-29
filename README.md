@@ -1,3 +1,10 @@
+##### Table of Contents  
+[Headers](#headers)  
+[Emphasis](#emphasis)  
+...snip...    
+<a name="headers"/>
+## Headers
+
 #Learn human driving behavior based on deep neural network
 This is [UDacity](https://www.udacity.com/drive) Self Driving Car Behavioral Cloning Project
 
@@ -75,6 +82,7 @@ had a [TensorFlow implementation](https://github.com/SullyChen/Autopilot-TensorF
 and shared his own [dataset](https://drive.google.com/file/d/0B-KJCaaF7ellQUkzdkpsQkloenM/view?usp=sharing)
 
 UDacity Sample data
+
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=LLCXS-uCMSw" target="_blank">
 <img src="http://img.youtube.com/vi/LLCXS-uCMSw/0.jpg" alt="UDacity Sample Data" width="600" height="360" border="10" /></a>
 
@@ -179,28 +187,35 @@ def raw_data_centre_left_right_image_crop():
 
 
 
-###Iteration 3 Shift Image Randomly
-so far we have made use of all provided data, other idea is that shift the images and adjust angles accordingly.
-for example, center image with angle 0, move 10 pixels left would result angle 0.04
-<image1><image2><image3>
-In this iteration, we are facing a slow generator issue, as some images have to shift in the runtime,
-the training time for on epoch need 10 minutes, where it's take 50 seconds in iteration 2.
-I discontinued this iteration and continue to 4
+###Iteration 5 Shift Image Randomly
+so far we have made use of all provided data, and our car able to drive half of the lap,
+it seems that we need some how create more data so that our car knows how to make a good
+right turn.
+Other idea is that shift the images and adjust angles accordingly.
+for example, center image with angle 0, move 10 pixels left would result angle 0.02
+
+![shift_center_images](images/results/shift_center_images.gif "shift_center_images")
+
+As we introduced random generator here, every batch our model will see different image so that we can't cache,
+the crop we did is a life saver this kind of process (espicially we will do more later),
+
+If we allow images shift 100 pixels, the number of samples could grow from 24,100 images to 2,410,000
+that's great for your model
 
 ```python
-dataset = DriveDataSet("datasets/udacity-sample-track-1/driving_log.csv", crop_images=False)
-data_generator = DataGenerator(
-    random_generators(
-        random_center_left_right_image_generator,
-        pipe_line_generators(
-            random_center_left_right_image_generator,
-            shift_image_generator
-        )
-    ))
-Trainer(learning_rate=0.0001, epoch=10, multi_process=True).fit(
-    data_generator.generate(dataset, batch_size=128),
-    input_shape=dataset.output_shape()
-)
+def raw_data_centre_left_right_crop_shift():
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    allocator = RecordRandomAllocator(data_set)
+    # shift_image_generator was the only difference
+    generator = shift_image_generator(angle_offset_pre_pixel=0.002)
+    data_generator = DataGenerator(allocator.allocate, generator)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    Trainer(model, learning_rate=0.0001, epoch=20,
+            custom_name=raw_data_centre_left_right_crop_shift.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
 ```
 
 ###Iteration 4, Crop to 66x200
