@@ -1,11 +1,13 @@
-##### Table of Contents  
-[Headers](#headers)  
-[Emphasis](#emphasis)  
-...snip...    
-<a name="headers"/>
-## Headers
-
 #Learn human driving behavior based on deep neural network
+
+##### Table of Contents  
+1. [Overview](#Overview)
+2. [Existing Solutions](#Existing_Solutions)
+⋅⋅* [Nvidia](#nvidia)
+⋅⋅* [Commaai](#commaai)
+
+<a name="Overview"/>
+#Overview
 This is [UDacity](https://www.udacity.com/drive) Self Driving Car Behavioral Cloning Project
 
 Lots of blog / repositories in internet just show you their final result, but how did they reach their beautiful 
@@ -22,7 +24,7 @@ To help achieve above goal, all code base has been formed by below layers or pip
 | Layer             | Purpose                                                                                           |
 | ------------------|---------------------------------------------------------------------------------------------------|
 | DriveDataSet      | Represent the data you recorded                                                                   |
-|   filter_method   | What data you'd like to added in                                                                  |
+| --filter_method   | What data you'd like to added in                                                                  |
 | RecordAllocator   | Before pass recorded data to data augment, percentage of different data you'd like to added in    |
 | generators        | Data augment process you'd like to apply to, easy to extend to any order                          |
 | DataGenerator     | Read from RecordAllocator, pass to generator, then feed data into Keras generator                 |
@@ -89,9 +91,10 @@ def segment_std_distribution_shift_flip_brightness_shadow():
     )
 ```
 
-###Before Start
-####Existing Solutions
-#####NVIDIA
+<a name="Existing_Solutions"/>
+#Existing Solutions
+<a name="nvidia"/>
+###NVIDIA
 Nvidia has published a nice paper [End to End Learning for Self-Driving Cars](https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf).
 This video will makes you very exciting.
 
@@ -99,12 +102,14 @@ This video will makes you very exciting.
 " target="_blank"><img src="http://img.youtube.com/vi/-96BEoXJMs0/0.jpg" 
 alt="NVIDIA AI Car Demonstration" width="400" height="360" border="10" /></a>
 
-#####Commaai
+<a name="commaai"/>
+###Commaai
 [The Paper](https://arxiv.org/abs/1608.01230)
 [Github Repository](https://github.com/commaai/research)
 [train_steering_model.py](https://github.com/commaai/research/blob/master/train_steering_model.py)
 
-####Data Collection
+<a name="data_collection"/>
+#Data Collection
 1. [UDacity](https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip) 
 provided a simulator and produced a sample data for track 1 that you can use.
 **this is recommended way**
