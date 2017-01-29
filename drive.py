@@ -14,7 +14,7 @@ from io import BytesIO
 
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
-from data_load import _crop_image
+from data_load import _crop_resize_image
 import scipy.misc
 
 # Fix error with Keras and TensorFlow
@@ -44,7 +44,7 @@ def telemetry(sid, data):
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     # image.save('out.jpg')
     image_array = np.asarray(image)
-    image_array = _crop_image(image_array, target_height, target_width)
+    image_array = _crop_resize_image(image_array, target_height, target_width)
     # Image.fromarray(image_array).save('out_cropped.jpg')
     transformed_image_array = image_array[None, :, :, :]
 

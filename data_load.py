@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 from performance_timer import Timer
 from functools import reduce
+import cv2
 
 CROP_HEIGHT = 66
 CROP_WIDTH = 200
@@ -21,15 +22,14 @@ def read_image_from_file(image_file_name):
     return plt.imread(image_file_name)
 
 
-def _crop_image(img, new_height=66, new_width=200):
+def _crop_resize_image(img, new_height=66, new_width=200):
     height, width = img.shape[0], img.shape[1]
     if (new_height >= height) and (new_width >= width):
         return img
 
     y_start = 60
-    x_start = int(width / 2) - int(new_width / 2)
 
-    return img[y_start:y_start + new_height, x_start:x_start + new_width]
+    return cv2.resize(img[y_start:y_start + new_height, :], (new_width, new_height))
 
 
 def _flatten(listoflists):
@@ -99,7 +99,7 @@ class DriveRecord(object):
             return np.array([[[1, 1, 1]]]).astype(np.uint8)
         image = read_image_from_file(file_name)
         if self.crop_image:
-            image = _crop_image(image, 66, 200)
+            image = _crop_resize_image(image, 66, 200)
         return image
 
 

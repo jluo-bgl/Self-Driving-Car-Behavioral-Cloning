@@ -39,10 +39,10 @@ class TestVideos(unittest.TestCase):
             "resources/sample_original.mp4")
 
     def test_create_sample_data_corp_video(self):
-        Video.from_udacity_sample_data(
-            DriveDataSet.from_csv("../datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
-                                  filter_method=drive_record_filter_exclude_duplicated_small_angles),
-            "resources/sample_crop.mp4")
+        records, drive_records, data_frame, base_folder = DriveDataSet.read_from_csv(
+            "../datasets/udacity-sample-track-1/driving_log.csv", crop_images=True,
+            filter_method=drive_record_filter_exclude_duplicated_small_angles)
+        Video.from_udacity_sample_data(drive_records, "resources/sample_crop.mp4")
 
 
 class TestPlot(unittest.TestCase):

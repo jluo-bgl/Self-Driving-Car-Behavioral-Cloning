@@ -29,14 +29,13 @@ class Video(object):
 
 
     @staticmethod
-    def from_udacity_sample_data(drive_data_set, file_name):
-        dataset = drive_data_set
+    def from_udacity_sample_data(drive_records, file_name):
         frames = []
         duration_pre_image = 0.1
-        total = len(dataset.drive_records)
+        total = len(drive_records)
         for index in range(0, total, 2):
             print("working {}/{}".format(index + 1, total))
-            record = dataset.drive_records[index]
+            record = drive_records[index]
             image, angle = record.image(), record.steering_angle
             text = TextClip(txt="angle:{:.2f}".format(angle),
                             method="caption", align="North",
