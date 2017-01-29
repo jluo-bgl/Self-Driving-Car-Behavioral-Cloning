@@ -48,7 +48,7 @@ def raw_data_centre_left_right_image():
     generator = image_itself
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_only.__name__).fit_generator(
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_left_right_image.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
