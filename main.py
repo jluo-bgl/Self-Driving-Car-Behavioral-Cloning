@@ -232,4 +232,5 @@ def segment_normal_distribution_shift_flip_brightness_shadow_reg():
 # raw_data_centre_left_right_crop_shift()
 # raw_data_centre_left_right_crop_shift_flip()
 # raw_data_centre_left_right_crop_shift_flip_brightness_shadow()
-segment_normal_distribution_shift_flip_brightness_shadow()
+# segment_normal_distribution_shift_flip_brightness_shadow()
+segment_normal_distribution_shift_flip_brightness_shadow_reg()
