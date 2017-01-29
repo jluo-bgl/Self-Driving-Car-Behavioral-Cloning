@@ -90,7 +90,7 @@ def raw_data_centre_left_right_crop_shift():
     generator = shift_image_generator(angle_offset_pre_pixel=0.002)
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=20,
+    Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
             custom_name=raw_data_centre_left_right_crop_shift.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
@@ -108,7 +108,7 @@ def raw_data_centre_left_right_crop_shift_flip():
     )
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=20,
+    Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
             custom_name=raw_data_centre_left_right_crop_shift_flip.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
