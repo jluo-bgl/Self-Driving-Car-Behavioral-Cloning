@@ -53,8 +53,40 @@ def raw_data_centre_image_only():
 raw_data_centre_image_only()
 ```
 
+the code to make our car running in both track 1 and 2
 ```python
-
+def segment_std_distribution_shift_flip_brightness_shadow():
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    # fine tune every part of training data so that make it meat std distrubtion
+    allocator = AngleSegmentRecordAllocator(
+        data_set,
+        AngleSegment((-1.5, -0.5), 10),  # big sharp left
+        AngleSegment((-0.5, -0.25), 14),  # sharp left
+        AngleSegment((-0.25, -0.249), 3),  # sharp turn left (zero right camera)
+        AngleSegment((-0.249, -0.1), 10),  # big turn left
+        AngleSegment((-0.1, 0), 11),  # straight left
+        AngleSegment((0, 0.001), 4),  # straight zero center camera
+        AngleSegment((0.001, 0.1), 11),  # straight right
+        AngleSegment((0.1, 0.25), 10),  # big turn right
+        AngleSegment((0.25, 0.251), 3),  # sharp turn right (zero left camera)
+        AngleSegment((0.251, 0.5), 14),  # sharp right
+        AngleSegment((0.5, 1.5), 10)  # big sharp right
+    )
+    # a pipe line with shift -> flip -> brightness -> shadow augment processes
+    augment = pipe_line_generators(
+        shift_image_generator(angle_offset_pre_pixel=0.002),
+        flip_generator,
+        brightness_image_generator(0.35),
+        shadow_generator
+    )
+    data_generator = DataGenerator(allocator.allocate, augment)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    Trainer(model, learning_rate=0.0001, epoch=45, multi_process=use_multi_process,
+            custom_name="bigger_angle_shift_0.002_bright_0.35_angles_35_30_35").fit_generator(
+        data_generator.generate(batch_size=256)
+    )
 ```
 
 ###Before Start
@@ -197,7 +229,7 @@ for example, center image with angle 0, move 10 pixels left would result angle 0
 ![shift_center_images](images/results/shift_center_images.gif "shift_center_images")
 
 As we introduced random generator here, every batch our model will see different image so that we can't cache,
-the crop we did is a life saver this kind of process (espicially we will do more later),
+the crop we did and enable multi_process is a life saver (espicially we will do more augment later),
 
 If we allow images shift 100 pixels, the number of samples could grow from 24,100 images to 2,410,000
 that's great for your model
@@ -208,11 +240,12 @@ def raw_data_centre_left_right_crop_shift():
         "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
         filter_method=drive_record_filter_include_all)
     allocator = RecordRandomAllocator(data_set)
-    # shift_image_generator was the only difference
+    # shift_image_generator added in
     generator = shift_image_generator(angle_offset_pre_pixel=0.002)
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=20,
+    # have to enable multi_process as image generator becomes to bottle neck
+    Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
             custom_name=raw_data_centre_left_right_crop_shift.__name__).fit_generator(
         data_generator.generate(batch_size=128)
     )
