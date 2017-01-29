@@ -234,8 +234,6 @@ Other idea is that shift the images and adjust angles accordingly.
 for example, center image with angle 0, move 10 pixels left would result angle 0.02
 
 ![shift_center_images](images/shift_center_images.gif "shift_center_images")
-![shift_left_images](images/shift_left_images.gif "shift_left_images")
-![shift_right_images](images/shift_right_images.gif "shift_right_images")
 
 As we introduced random generator here, every batch our model will see different image so that we can't cache,
 the crop we did and enable multi_process is a life saver (espicially we will do more augment later),
@@ -260,25 +258,41 @@ def raw_data_centre_left_right_crop_shift():
     )
 ```
 **160seconds** per epoch, final loss **0.036**, total trainable params: **1,595,511**, the weights file has 6.4mb
+
+We are able to run whole lap without crush, great achievement!!
+
 ![raw_data_centre_left_right_crop_shift](images/results/raw_data_centre_left_right_crop_shift.gif "raw_data_centre_left_right_crop_shift")
 ![raw_data_centre_left_right_crop_shift track 2](images/results/raw_data_centre_left_right_crop_shift track 2.gif "raw_data_centre_left_right_crop_shift track 2")
 
 
-###Iteration 5, remove shift from left and right camera images
-while look at the video, I noticed that it's go wild when approch road side, that's must be something wrong 
-with shift image, the angle we offset may too much, the left/right image we are using may use different ratio.
-so that in this test, just simple remove left right image before shift.
-As you can see in video, the car is much more smooth and can drive longer.
+##Iteration 6, Shift and Flip
+In last iteration, our car able to run in track 1, but fail in track 2, also wheels 
+has cross the degoue zoom, which is conside as not safe.
+
+Flip is a way to generate image by a mirror-reversal of an original across a horizontal axis.
+
+
 ```python
-data_generator = DataGenerator(
-    random_generators(
-        center_image_generator,
-        pipe_line_generators(
-            random_center_left_right_image_generator,
-            shift_image_generator
-        )
-    ))
+def raw_data_centre_left_right_crop_shift():
+    data_set = DriveDataSet.from_csv(
+        "datasets/udacity-sample-track-1/driving_log.csv", crop_images=True, all_cameras_images=True,
+        filter_method=drive_record_filter_include_all)
+    allocator = RecordRandomAllocator(data_set)
+    # shift_image_generator added in
+    generator = shift_image_generator(angle_offset_pre_pixel=0.002)
+    data_generator = DataGenerator(allocator.allocate, generator)
+    model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
+    # have to enable multi_process as image generator becomes to bottle neck
+    Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
+            custom_name=raw_data_centre_left_right_crop_shift.__name__).fit_generator(
+        data_generator.generate(batch_size=128)
+    )
 ```
+**160seconds** per epoch, final loss **0.036**, total trainable params: **1,595,511**, the weights file has 6.4mb
+
+![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=FWNCuCbronw" target="_blank">
+<img src="http://img.youtube.com/vi/FWNCuCbronw/0.jpg" alt="raw_data_centre_left_right_crop_shift_flip" width="320" height="200" border="10" /></a>
 
 
 ###Iteration 6 Flip Image
