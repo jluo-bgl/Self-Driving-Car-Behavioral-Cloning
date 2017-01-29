@@ -358,6 +358,13 @@ The Udacity Sample data has below distribution
 
 ![angle_distribution_original](images/angle_distribution_original.png)
 
+The straight angle (zero degree) has far more chance feeding into model, where the real
+turn looks becomes very minor to system.
+
+As we have a augment pipe line, what happens if we invove pipe line in?
+![angle_distribution_generator_random_allocator](images/angle_distribution_generator_random_allocator.png)
+
+
 As you can see, angle 0 (going straight) has far more samples, as we used left and right camera data, 0.25 and -0.25
 is same.
 what it happened in real world of our steering angle distributed? I guess maybe it's 25% of left and right turn, 50% 
