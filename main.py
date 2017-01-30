@@ -4,6 +4,7 @@ from data_generators import image_itself, brightness_image_generator, shadow_gen
     shift_image_generator, random_generators, pipe_line_generators, pipe_line_random_generators, flip_generator
 from trainer import Trainer
 from model import nvidia, nvidia_with_regularizer
+import inspect
 
 
 def is_osx():
@@ -34,7 +35,7 @@ def raw_data_centre_image_no_dropout():
     # create the model
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.0)
     # put everthing together, start a real Keras training process with fit_generator
-    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_no_dropout.__name__).fit_generator(
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -48,7 +49,7 @@ def raw_data_centre_image_dropout_5():
     data_generator = DataGenerator(allocator.allocate, augment)
     # dropout=0.5 was the only difference
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_image_dropout_5.__name__).fit_generator(
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -62,7 +63,7 @@ def raw_data_centre_left_right_image():
     generator = image_itself
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_left_right_image.__name__).fit_generator(
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -76,7 +77,7 @@ def raw_data_centre_left_right_image_crop():
     generator = image_itself
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
-    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=raw_data_centre_left_right_image_crop.__name__).fit_generator(
+    Trainer(model, learning_rate=0.0001, epoch=10, custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -92,7 +93,7 @@ def raw_data_centre_left_right_crop_shift():
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
     # have to enable multi_process as image generator becomes to bottle neck
     Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
-            custom_name=raw_data_centre_left_right_crop_shift.__name__).fit_generator(
+            custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -110,7 +111,7 @@ def raw_data_centre_left_right_crop_shift_flip():
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
     Trainer(model, learning_rate=0.0001, epoch=20, multi_process=use_multi_process,
-            custom_name=raw_data_centre_left_right_crop_shift_flip.__name__).fit_generator(
+            custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -130,7 +131,7 @@ def raw_data_centre_left_right_crop_shift_flip_brightness_shadow():
     data_generator = DataGenerator(allocator.allocate, generator)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
     Trainer(model, learning_rate=0.0001, epoch=30, multi_process=use_multi_process,
-            custom_name=raw_data_centre_left_right_crop_shift_flip_brightness_shadow.__name__).fit_generator(
+            custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=128)
     )
 
@@ -186,7 +187,7 @@ def segment_normal_distribution_shift_flip_brightness_shadow():
     data_generator = DataGenerator(allocator.allocate, augment)
     model = nvidia(input_shape=data_set.output_shape(), dropout=0.5)
     Trainer(model, learning_rate=0.0001, epoch=45, multi_process=use_multi_process,
-            custom_name=segment_normal_distribution_shift_flip_brightness_shadow.__name__).fit_generator(
+            custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=256)
     )
 
@@ -218,9 +219,9 @@ def segment_normal_distribution_shift_flip_brightness_shadow_reg():
         shadow_generator
     )
     data_generator = DataGenerator(allocator.allocate, augment)
-    model = nvidia_with_regularizer(input_shape=data_set.output_shape(), dropout=0.5)
+    model = nvidia_with_regularizer(input_shape=data_set.output_shape(), dropout=0.2)
     Trainer(model, learning_rate=0.0001, epoch=45, multi_process=use_multi_process,
-            custom_name=segment_normal_distribution_shift_flip_brightness_shadow.__name__).fit_generator(
+            custom_name=inspect.stack()[0][3]).fit_generator(
         data_generator.generate(batch_size=256)
     )
 
