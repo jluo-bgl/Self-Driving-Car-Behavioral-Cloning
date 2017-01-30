@@ -46,7 +46,7 @@ def nvidia(input_shape, dropout):
 
 
 def nvidia_with_regularizer(input_shape, dropout):
-    INIT = 'glorot_uniform'  # 'he_normal', glorot_uniform
+    INIT = 'glorot_uniform'
     reg_val = 0.01
 
     model = Sequential()
