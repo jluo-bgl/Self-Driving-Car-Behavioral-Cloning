@@ -56,7 +56,7 @@ To help achieve above goal, all code base has been formed by below layers or pip
 | RecordAllocator   | Before pass recorded data to data augment, percentage of different data you'd like to added in    |
 | generators        | Data augment process you'd like to apply to, easy to extend to any order                          |
 | DataGenerator     | Read from RecordAllocator, pass to generator, then feed data into Keras generator                 |
-| model             | the Network                                                                                      |
+| model             | the Network                                                                                       |
 | Trainer           | create Model, read data from DataGenerator, do the real training                                  |
 
 
@@ -240,7 +240,7 @@ def raw_data_centre_left_right_image():
 By remove the informat we know won't effecting steering angle, for example sky, we 
 can make our model more focuse to the things that matters.
 by reduce image size from 160x320 to 66x200, we reduced the training time from 50 seconds 
-epoch to 10 seconds! the trainable parames reduced from **32,213,367** to **1,595,511**
+epoch to 10 seconds! the trainable parames reduced from **32,213,367** to **252,219**
 and the result is amazing, we are able to pass until next right turn
 
 The cropped version of sample data video:
@@ -262,7 +262,7 @@ def raw_data_centre_left_right_image_crop():
         data_generator.generate(batch_size=128)
     )
 ```
-**10seconds** per epoch, final loss **0.033**, total trainable params: **1,595,511**, the weights file has 6.4mb
+**10seconds** per epoch, final loss **0.033**, total trainable params: **252,219**, the weights file has 6.4mb
 ![centre_left_right_crop](images/results/centre_left_right_crop.gif "centre_left_right_crop")
 
 <a name="centre_left_right_images_crop_shift"/>
@@ -298,7 +298,7 @@ def raw_data_centre_left_right_crop_shift():
         data_generator.generate(batch_size=128)
     )
 ```
-**160seconds** per epoch, final loss **0.036**, total trainable params: **1,595,511**, the weights file has 6.4mb
+**160seconds** per epoch, final loss **0.036**, total trainable params: **252,219**, the weights file has 6.4mb
 
 We are able to run whole lap without crush, great achievement!!
 
@@ -331,7 +331,7 @@ def raw_data_centre_left_right_crop_shift_flip():
         data_generator.generate(batch_size=128)
     )
 ```
-**160seconds** per epoch, final loss **0.035**, total trainable params: **1,595,511**, the weights file has 6.4mb
+**160seconds** per epoch, final loss **0.035**, total trainable params: **252,219**, the weights file has 6.4mb
 
 ![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
 
@@ -379,7 +379,7 @@ def raw_data_centre_left_right_crop_shift_flip():
         data_generator.generate(batch_size=128)
     )
 ```
-**180seconds** per epoch, final loss **0.035**, total trainable params: **1,595,511**, the weights file has 6.4mb
+**180seconds** per epoch, final loss **0.035**, total trainable params: **252,219**, the weights file has 6.4mb
 
 ![raw_data_centre_left_right_crop_shift_flip](images/results/raw_data_centre_left_right_crop_shift_flip.gif "raw_data_centre_left_right_crop_shift_flip")
 
@@ -474,13 +474,21 @@ Track 2 (The track model never see)
 <a name="remove_zero_angles_or_not"/>
 
 ## Remove Zero Angles or Remove Duplicated Small Angles
-I saw lots of blog says if put too many zero angles to model, model will learn the zero bias.
-my experientment shows that instead remove lots of data, it's better to add more 
+I saw lots of blog says if put too many zero angles to model, model will bias to zero.
+
+my experiment shows that instead remove lots of data, it's better to add more 
 data to make it normal distributed. (remove zero angle data will reduce the training sample to half)
 
 
 <a name="todos"/>
 
 #TODOs
+
+##More Models
 There are lot more waiting to explorer. the model has been totally been left out, only 
 nvidia has been tested in this repo, feel free to fork this repo and experience more.
+1. nvidia with regularizer
+2. commaai model
+3. design some new model
+4. add RNN
+5. check udacity competition 2 and bring more model in
