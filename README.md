@@ -9,27 +9,29 @@
 
 2.2 [Commaai](#commaai)
 
-3.. [Data Collection](#data_collection)
+3.. Model(#model)
 
-4.. [Iterations](#iterations)
+4.. [Data Collection](#data_collection)
 
-4.1 [Iteration 1, Centre Image Only, no dropout](#centre_image_no_dropout)
+5.. [Iterations](#iterations)
 
-4.2 [Iteration 2 Centre Image Only with 0.5 dropout](#centre_image_dropout_5)
+5.1 [Iteration 1, Centre Image Only, no dropout](#centre_image_no_dropout)
 
-4.3 [Iteration 3 Center/Left/Right Images](#centre_left_right_images)
+5.2 [Iteration 2 Centre Image Only with 0.5 dropout](#centre_image_dropout_5)
 
-4.4 [Iteration 3 Center/Left/Right Images With Crop](#centre_left_right_images_crop)
+5.3 [Iteration 3 Center/Left/Right Images](#centre_left_right_images)
 
-4.5 [Iteration 5 Shift Image Randomly](#centre_left_right_images_crop_shift)
+5.4 [Iteration 3 Center/Left/Right Images With Crop](#centre_left_right_images_crop)
 
-4.6 [Iteration 6 Shift and Flip](#centre_left_right_images_crop_shift_flip)
+5.5 [Iteration 5 Shift Image Randomly](#centre_left_right_images_crop_shift)
 
-4.7 [Iteration 7 Shift, Flip, Brightness and Shadown](#centre_left_right_images_crop_shift_flip_brightness_shadown)
+5.6 [Iteration 6 Shift and Flip](#centre_left_right_images_crop_shift_flip)
 
-4.8 [Iteration 8 Feeding data distribution](#data_distribution)
+5.7 [Iteration 7 Shift, Flip, Brightness and Shadown](#centre_left_right_images_crop_shift_flip_brightness_shadown)
 
-5.. [Todos](#todos)
+5.8 [Iteration 8 Feeding data distribution](#data_distribution)
+
+6.. [Todos](#todos)
 
 
 <a name="Overview"/>
@@ -153,6 +155,13 @@ UDacity Sample data
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=LLCXS-uCMSw" target="_blank">
 <img src="http://img.youtube.com/vi/LLCXS-uCMSw/0.jpg" alt="UDacity Sample Data" width="320" height="360" border="10" /></a>
+
+<a name="model"/>
+
+#Model
+##nvidia
+![nvidia model](images/nvidia_model.png)
+
 
 <a name="iterations"/>
 
@@ -469,7 +478,7 @@ Track 2 (The track model never see)
 
 <a name="other_thinking"/>
 
-#Other Experientment
+#Other Experiment
 
 <a name="remove_zero_angles_or_not"/>
 
@@ -484,11 +493,17 @@ data to make it normal distributed. (remove zero angle data will reduce the trai
 
 #TODOs
 
+##Data
+Don't use Udacity sample data, record our own with 4 laps, 8 laps, see how it effecting the rest especially generalization
+
 ##More Models
 There are lot more waiting to explorer. the model has been totally been left out, only 
 nvidia has been tested in this repo, feel free to fork this repo and experience more.
-1. nvidia with regularizer
+1. nvidia with regularizer and YUV channels
 2. commaai model
 3. design some new model
 4. add RNN
 5. check udacity competition 2 and bring more model in
+
+##Visualization
+visualize how CNN sees the input picture could be fun, and could help us understanding if training is good or not
