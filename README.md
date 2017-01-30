@@ -499,6 +499,7 @@ Don't use Udacity sample data, record our own with 4 laps, 8 laps, see how it ef
 ##More Models
 There are lot more waiting to explorer. the model has been totally been left out, only 
 nvidia has been tested in this repo, feel free to fork this repo and experience more.
+
 1. nvidia with regularizer and YUV channels
 2. commaai model
 3. design some new model
