@@ -189,7 +189,7 @@ def raw_data_centre_image_only():
         data_generator.generate(batch_size=128)
     )
 ```
-**50seconds** per epoch, final loss **0.004**, total trainable params: **32,213,367**, the weights file has 128mb
+**50seconds** per epoch, final loss **0.004**, total trainable params: **2,882,619**, the weights file has 128mb
 
 car gose wild and running into water before bridge
 
@@ -215,7 +215,7 @@ def raw_data_centre_image_dropout_5():
         data_generator.generate(batch_size=128)
     )
 ```
-**50seconds** per epoch, final loss **0.012**, total trainable params: **32,213,367**, the weights file has 128mb
+**50seconds** per epoch, final loss **0.012**, total trainable params: **2,882,619**, the weights file has 128mb
 ![raw_data_centre_image_dropout_5](images/results/centre_camera_nvidia_drop0.5.gif "centre_camera_nvidia_drop0.5")
 
 <a name="centre_left_right_images"/>
@@ -240,7 +240,7 @@ def raw_data_centre_left_right_image():
         data_generator.generate(batch_size=128)
     )
 ```
-**50seconds** per epoch, final loss **0.024**, total trainable params: **32,213,367**, the weights file has 128mb
+**50seconds** per epoch, final loss **0.024**, total trainable params: **2,882,619**, the weights file has 128mb
 ![center_left_right](images/results/center_left_right.gif "center_left_right")
 
 <a name="centre_left_right_images_crop"/>
@@ -249,7 +249,7 @@ def raw_data_centre_left_right_image():
 By remove the informat we know won't effecting steering angle, for example sky, we 
 can make our model more focuse to the things that matters.
 by reduce image size from 160x320 to 66x200, we reduced the training time from 50 seconds 
-epoch to 10 seconds! the trainable parames reduced from **32,213,367** to **252,219**
+epoch to 10 seconds! the trainable parames reduced from **2,882,619** to **252,219**
 and the result is amazing, we are able to pass until next right turn
 
 The cropped version of sample data video:
